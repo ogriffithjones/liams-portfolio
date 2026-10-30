@@ -1,0 +1,17 @@
+---
+// A titled section of the page, laid out like a scene: heading, then content.
+interface Props {
+  heading: string;
+  scene: number;
+  id: string;
+}
+
+const { heading, scene, id } = Astro.props;
+---
+
+<section class="page sp" aria-labelledby={id}>
+  {heading && <h2 id={id} class="sp-scene" data-scene={scene}>{heading}</h2>}
+  <div class="body">
+    <slot />
+  </div>
+</section>

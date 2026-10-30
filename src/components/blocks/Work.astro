@@ -1,0 +1,70 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  work: CollectionEntry<'work'>[];
+  /** Slugs chosen in the CMS, in order. Empty means all work. */
+  items: (string | null)[];
+}
+
+const { work, items } = Astro.props;
+const chosen = items.filter((slug): slug is string => !!slug);
+const list = chosen.length
+  ? chosen.map((slug) => work.find((w) => w.id === slug)).filter((w) => w !== undefined)
+  : work;
+---
+
+<div class="work">
+  {
+    list.map(({ data }) => (
+      <article class="reveal">
+        {data.image && (
+          <Image
+            src={data.image}
+            alt={data.imageAlt ?? ''}
+            widths={[480, 720, 960, 1280]}
+            sizes="(min-width: 42rem) 38rem, 100vw"
+            loading="lazy"
+          />
+        )}
+        <h3>
+          {data.link ? (
+            <a href={data.link} rel="noopener" target="_blank">
+              {data.title}
+            </a>
+          ) : (
+            data.title
+          )}{' '}
+          ({data.year})
+        </h3>
+        {data.role && <p class="muted">{data.role}</p>}
+        {data.description && <p class="desc">{data.description}</p>}
+      </article>
+    ))
+  }
+</div>
+
+<style>
+  .work {
+    display: grid;
+    gap: 3lh;
+  }
+
+  .work :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    margin-bottom: 1lh;
+    background: var(--line);
+  }
+
+  h3 {
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .desc {
+    margin-top: 1lh;
+  }
+</style>

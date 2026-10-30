@@ -1,0 +1,105 @@
+---
+// Rendered as a server island: the page stays static, and this block is
+// fetched separately and cached at Vercel's edge for an hour, so new
+// Letterboxd watches show up without a rebuild.
+import { recentWatches, stars, type Watch } from '../lib/letterboxd';
+
+interface Props {
+  username: string;
+  count: number;
+}
+
+const { username, count } = Astro.props;
+
+let watches: Watch[] = [];
+try {
+  watches = await recentWatches(username, count);
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+} catch (error) {
+  console.error(error);
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300');
+}
+---
+
+{
+  watches.length > 0 ? (
+    <ul class="watches">
+      {watches.map((w, i) => (
+        <li style={`--i: ${i}`}>
+          <a href={w.url} rel="noopener" target="_blank">
+            {w.poster ? (
+              <img src={w.poster} alt={`Poster for ${w.title}`} width="300" height="450" loading="lazy" decoding="async" />
+            ) : (
+              <span class="poster" />
+            )}
+            <span class="name">{w.title}</span>
+          </a>
+          <span class="muted">
+            {w.year}
+            {w.rating ? ` ${stars(w.rating)}` : ''}
+          </span>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p>
+      <a href={`https://letterboxd.com/${username}/`}>See what's playing on Letterboxd</a>
+    </p>
+  )
+}
+
+<style>
+  .watches {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1lh 2ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875em;
+  }
+
+  @media (max-width: 34rem) {
+    .watches {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  li {
+    animation: fade-up 0.6s var(--ease) both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    li {
+      animation: none;
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+
+  a {
+    display: block;
+    text-decoration: none;
+  }
+
+  img,
+  .poster {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background: var(--line);
+  }
+
+  .name {
+    display: block;
+    margin-top: 0.5lh;
+    text-transform: uppercase;
+  }
+</style>

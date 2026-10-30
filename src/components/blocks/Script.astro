@@ -1,0 +1,34 @@
+---
+import type { ScriptLine } from '../../lib/blocks';
+
+interface Props {
+  lines: ScriptLine[];
+  typewriter: boolean;
+  /** Scene number for the first scene heading in this script. */
+  firstScene: number;
+}
+
+const { lines, typewriter, firstScene } = Astro.props;
+
+// Headings and transitions type slowly, prose types quickly.
+const pace = { scene: 'slow', transition: 'slow', centered: 'slow', character: 'normal', parenthetical: 'normal', dialogue: 'normal', action: 'fast' } as const;
+
+let scene = firstScene;
+const rendered = lines
+  .filter((line) => line.text.trim())
+  .map((line) => ({
+    ...line,
+    text: line.kind === 'parenthetical' ? `(${line.text.trim().replace(/^\(|\)$/g, '')})` : line.text.trim(),
+    scene: line.kind === 'scene' ? scene++ : undefined,
+  }));
+---
+
+<div class="page sp">
+  {
+    rendered.map((line) => (
+      <p class={`sp-${line.kind}`} data-scene={line.scene} data-type={typewriter ? pace[line.kind] : undefined}>
+        {line.text}
+      </p>
+    ))
+  }
+</div>

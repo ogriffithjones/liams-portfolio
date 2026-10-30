@@ -1,0 +1,56 @@
+blocks:
+  - discriminant: script
+    value:
+      typewriter: true
+      lines:
+        - kind: action
+          text: 'FADE IN:'
+        - kind: scene
+          text: INT. LOCATION — DAY
+        - kind: action
+          text: >-
+            Action placeholder. Set the scene in a sentence or two. The first
+            time a character appears, their name is in capitals: LIAM DUNSTAN.
+        - kind: character
+          text: LIAM
+        - kind: parenthetical
+          text: beat
+        - kind: dialogue
+          text: Dialogue placeholder. A line or two, in your own voice.
+  - discriminant: transition
+    value:
+      text: 'CUT TO:'
+  - discriminant: watching
+    value:
+      heading: INT. SCREENING ROOM — NIGHT
+      username: '25660'
+      count: 4
+  - discriminant: transition
+    value:
+      text: 'CUT TO:'
+  - discriminant: work
+    value:
+      heading: INT. WORK — DAY
+      items: []
+  - discriminant: transition
+    value:
+      text: 'CUT TO:'
+  - discriminant: notes
+    value:
+      heading: INT. NOTES ON FILM — NIGHT
+      limit: null
+  - discriminant: transition
+    value:
+      text: 'CUT TO:'
+  - discriminant: contact
+    value:
+      heading: EXT. CONTACT — DAY
+  - discriminant: transition
+    value:
+      text: FADE OUT.
+  - discriminant: script
+    value:
+      typewriter: false
+      lines:
+        - kind: centered
+          text: THE END

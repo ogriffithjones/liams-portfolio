@@ -1,0 +1,40 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, isoDate } from '../../lib/content';
+
+interface Props {
+  notes: CollectionEntry<'notes'>[];
+  limit: number | null | undefined;
+}
+
+const { notes, limit } = Astro.props;
+const list = limit ? notes.slice(0, limit) : notes;
+---
+
+<ul class="notes">
+  {
+    list.map(({ id, data }) => (
+      <li class="reveal">
+        <a href={`/notes/${id}`}>{data.title}</a>
+        <p class="muted">
+          {data.film && <>{data.film} · </>}
+          <time datetime={isoDate(data.date)}>{formatDate(data.date)}</time>
+        </p>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .notes {
+    display: grid;
+    gap: 1lh;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    text-transform: uppercase;
+  }
+</style>

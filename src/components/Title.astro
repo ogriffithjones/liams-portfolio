@@ -1,0 +1,30 @@
+---
+// The title page. Always first, so the page always has its <h1>.
+import { getSite } from '../lib/content';
+
+const { name, role } = await getSite();
+---
+
+<header class="page title">
+  <h1 data-type="slow">{name}</h1>
+  {role && <p class="muted" data-type="normal">{role}</p>}
+</header>
+
+<style>
+  .title {
+    padding-block: clamp(5rem, 18vh, 10rem) 4lh;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    text-decoration-thickness: 1px;
+  }
+
+  p {
+    margin-top: 1lh;
+  }
+</style>

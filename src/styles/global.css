@@ -1,0 +1,230 @@
+:root {
+  --paper: #f7f5f0;
+  --ink: #1a1a1a;
+  --muted: #8a867d;
+  --line: #e2ded5;
+  --gutter: 1.25rem;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #121211;
+    --ink: #e9e6df;
+    --muted: #807c73;
+    --line: #2a2926;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-script), 'Courier New', monospace;
+  font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.0625rem);
+  line-height: 1.35;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  transition: color 0.2s var(--ease);
+}
+
+a:hover {
+  color: var(--muted);
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: var(--gutter);
+  top: 1rem;
+  background: var(--paper);
+  padding: 0.5rem 1rem;
+  z-index: 10;
+}
+
+/*
+ * The page is one screenplay column: 60 characters wide, like 6" of
+ * 10-pitch Courier. Element indents are fractions of that column, so they
+ * match a real script on desktop and scale down on phones.
+ */
+.page {
+  max-width: calc(60ch + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Blank line between elements, like a typed page */
+.sp > * + * {
+  margin-top: 1lh;
+}
+
+.sp-scene {
+  position: relative;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sp > * + .sp-scene {
+  margin-top: 2lh;
+}
+
+.sp-character {
+  margin-left: 36.67%; /* 22ch */
+  text-transform: uppercase;
+}
+
+.sp-parenthetical {
+  margin-left: 26.67%; /* 16ch */
+  max-width: 33.33%;
+  padding-left: 1ch;
+  text-indent: -1ch;
+}
+
+.sp-dialogue {
+  margin-left: 16.67%; /* 10ch */
+  max-width: 58.33%; /* 35ch */
+}
+
+.sp-transition {
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.sp-centered {
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* Character, parenthetical and dialogue sit together with no blank line */
+.sp > .sp-character + .sp-parenthetical,
+.sp > .sp-character + .sp-dialogue,
+.sp > .sp-parenthetical + .sp-dialogue,
+.sp > .sp-dialogue + .sp-parenthetical {
+  margin-top: 0;
+}
+
+@media (max-width: 34rem) {
+  .sp-parenthetical {
+    max-width: 50%;
+  }
+
+  .sp-dialogue {
+    max-width: 75%;
+  }
+}
+
+/* Scene numbers in both margins, as in a shooting script */
+@media (min-width: 52rem) {
+  .sp-scene[data-scene]::before,
+  .sp-scene[data-scene]::after {
+    content: attr(data-scene);
+    position: absolute;
+    top: 0;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .sp-scene[data-scene]::before {
+    right: calc(100% + 5ch);
+  }
+
+  .sp-scene[data-scene]::after {
+    left: calc(100% + 5ch);
+  }
+}
+
+/* Gentle rise as blocks scroll into view (no JavaScript) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 30%;
+    }
+  }
+}
+
+/* Long-form note content rendered from Markdoc */
+.prose {
+  line-height: 1.6;
+}
+
+.prose > * + * {
+  margin-top: 1.25em;
+}
+
+.prose h2,
+.prose h3 {
+  margin-top: 2.5em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.prose img {
+  width: 100%;
+  margin-block: 2rem;
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--line);
+  color: var(--muted);
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin-block: 3rem;
+}

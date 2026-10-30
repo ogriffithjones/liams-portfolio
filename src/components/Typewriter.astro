@@ -1,0 +1,133 @@
+<!--
+  Types every [data-type] element above this script, once per visit.
+  The full text is already in the HTML (for search engines and no-JS
+  visitors); untyped characters stay in place as transparent text so the
+  layout never shifts. Typing is time-based (not per tick) so it stays smooth
+  on slow devices. Click, scroll or press a key and the rest fades in.
+-->
+<script is:inline>
+  (() => {
+    const html = document.documentElement;
+    const els = [...document.querySelectorAll('[data-type]')];
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem('script-typed') === '1';
+      sessionStorage.setItem('script-typed', '1');
+    } catch {}
+    if (!els.length || seen || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    // ms per character, and the pause after each kind of line
+    const speed = { slow: 40, normal: 24, fast: 11 };
+    const pause = { slow: 420, normal: 280, fast: 280 };
+
+    const lines = els.map((el) => {
+      const text = el.textContent;
+      const typed = document.createElement('span');
+      const rest = document.createElement('span');
+      rest.className = 'ghost';
+      rest.textContent = text;
+      el.replaceChildren(typed, rest);
+      const pace = el.dataset.type || 'normal';
+      return { el, text, typed, rest, ms: speed[pace] ?? speed.normal, wait: pause[pace] ?? pause.normal };
+    });
+
+    let index = 0;
+    let start = 0;
+    let frame;
+    let timer;
+    const skipEvents = ['pointerdown', 'keydown', 'wheel', 'touchmove'];
+
+    const restore = () => {
+      lines.forEach(({ el, text }) => {
+        el.textContent = text;
+        el.classList.remove('active', 'started');
+      });
+      html.classList.remove('typing', 'typing-skip');
+    };
+
+    const stopListening = () => skipEvents.forEach((e) => removeEventListener(e, skip));
+
+    function skip() {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+      stopListening();
+      lines.forEach(({ el }) => el.classList.remove('active'));
+      html.classList.add('typing-skip');
+      timer = setTimeout(restore, 600);
+    }
+
+    const step = (now) => {
+      const line = lines[index];
+      if (!start) {
+        start = now;
+        line.el.classList.add('active', 'started');
+      }
+      const count = Math.min(line.text.length, Math.floor((now - start) / line.ms) + 1);
+      if (count !== line.typed.textContent.length) {
+        line.typed.textContent = line.text.slice(0, count);
+        line.rest.textContent = line.text.slice(count);
+      }
+      if (count < line.text.length) {
+        frame = requestAnimationFrame(step);
+      } else if (index === lines.length - 1) {
+        // Leave the cursor blinking on the last line for a moment
+        stopListening();
+        timer = setTimeout(restore, 2400);
+      } else {
+        line.el.classList.remove('active');
+        index++;
+        start = 0;
+        timer = setTimeout(() => (frame = requestAnimationFrame(step)), line.wait);
+      }
+    };
+
+    html.classList.add('typing');
+    skipEvents.forEach((e) => addEventListener(e, skip, { passive: true }));
+    timer = setTimeout(() => (frame = requestAnimationFrame(step)), 300);
+  })();
+</script>
+
+<style is:global>
+  .typing .ghost {
+    opacity: 0;
+    transition: opacity 0.5s var(--ease);
+  }
+
+  .typing-skip .ghost {
+    opacity: 1;
+  }
+
+  /* Scene numbers appear as their heading starts typing */
+  .typing [data-type]::before,
+  .typing [data-type]::after {
+    transition: opacity 0.5s var(--ease);
+  }
+
+  .typing:not(.typing-skip) [data-type]:not(.started)::before,
+  .typing:not(.typing-skip) [data-type]:not(.started)::after {
+    opacity: 0;
+  }
+
+  /* Zero-width caret so it never pushes text onto a new line */
+  .typing .active > span:first-child::after {
+    content: '';
+    display: inline-block;
+    width: 0.55ch;
+    height: 1.05em;
+    margin-right: -0.55ch;
+    vertical-align: -0.15em;
+    background: currentColor;
+    animation: caret 1.1s var(--ease) infinite;
+  }
+
+  @keyframes caret {
+    0%,
+    45% {
+      opacity: 1;
+    }
+    55%,
+    100% {
+      opacity: 0;
+    }
+  }
+</style>
