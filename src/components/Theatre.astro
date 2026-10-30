@@ -1,0 +1,135 @@
+---
+// Full-screen video overlay plus preview-loop playback for work tiles.
+// Include once on any page with [data-video] buttons or [data-loop] videos.
+---
+
+<dialog class="theatre" aria-label="Video player">
+  <button class="close" type="button" aria-label="Close video">Close ✕</button>
+  <div class="screen"></div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.theatre')!;
+  const screen = dialog.querySelector<HTMLElement>('.screen')!;
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Theatre: load the player only when someone presses play.
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element).closest<HTMLElement>('[data-video]');
+    if (!button) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = button.dataset.video!;
+    iframe.title = button.dataset.title ?? 'Video';
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+    iframe.allowFullscreen = true;
+    screen.replaceChildren(iframe);
+    document.querySelectorAll<HTMLVideoElement>('video[data-loop]').forEach((v) => v.pause());
+    dialog.showModal();
+  });
+
+  dialog.querySelector('.close')!.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (event) => event.target === dialog && dialog.close());
+  // Removing the iframe stops playback
+  dialog.addEventListener('close', () => setTimeout(() => screen.replaceChildren(), 300));
+
+  // Preview loops: on hover, or while in view. Never with reduced motion.
+  const loops = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]')];
+  const play = (video: HTMLVideoElement) => {
+    if (video.preload === 'none') video.preload = 'auto';
+    video.play().then(() => video.classList.add('playing'), () => {});
+  };
+  const stop = (video: HTMLVideoElement) => {
+    video.pause();
+    video.classList.remove('playing');
+  };
+
+  if (!reduceMotion && loops.length) {
+    const canHover = matchMedia('(hover: hover)').matches;
+    const inView = new IntersectionObserver(
+      (entries) => entries.forEach((e) => (e.isIntersecting ? play : stop)(e.target as HTMLVideoElement)),
+      { threshold: 0.5 },
+    );
+    for (const video of loops) {
+      if (video.dataset.loop === 'hover' && canHover) {
+        const tile = video.closest('.frame') ?? video;
+        tile.addEventListener('pointerenter', () => play(video));
+        tile.addEventListener('pointerleave', () => stop(video));
+      } else {
+        inView.observe(video);
+      }
+    }
+  }
+</script>
+
+<style is:global>
+  .theatre {
+    width: min(94vw, calc(88vh * 16 / 9));
+    max-width: none;
+    max-height: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #e9e6df;
+    overflow: visible;
+    opacity: 0;
+    transform: scale(0.98);
+    transition:
+      opacity 0.35s var(--ease),
+      transform 0.35s var(--ease),
+      overlay 0.35s allow-discrete,
+      display 0.35s allow-discrete;
+  }
+
+  .theatre[open] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .theatre::backdrop {
+    background: rgb(8 8 8 / 0);
+    transition:
+      background 0.35s var(--ease),
+      overlay 0.35s allow-discrete,
+      display 0.35s allow-discrete;
+  }
+
+  .theatre[open]::backdrop {
+    background: rgb(8 8 8 / 0.92);
+  }
+
+  @starting-style {
+    .theatre[open] {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+
+    .theatre[open]::backdrop {
+      background: rgb(8 8 8 / 0);
+    }
+  }
+
+  .theatre .screen {
+    aspect-ratio: 16 / 9;
+    background: #000;
+  }
+
+  .theatre iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .theatre .close {
+    position: absolute;
+    bottom: calc(100% + 0.75rem);
+    right: 0;
+    padding: 0.25rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+</style>

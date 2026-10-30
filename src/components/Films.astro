@@ -1,0 +1,177 @@
+---
+// Films as a poster grid or a numbered list with notes. Used by lists,
+// reviews and their home page blocks.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import type { Poster } from '../lib/tmdb';
+import type { Columns, FilmLayout } from '../lib/options';
+
+export interface FilmItem {
+  title: string;
+  year?: number | null | undefined;
+  href?: string | null | undefined;
+  external?: boolean;
+  poster?: Poster | ImageMetadata | null | undefined;
+  /** Small line under the title, e.g. "★★★★ · 12 Oct 2026" */
+  meta?: string | undefined;
+  note?: string | undefined;
+  /** data-* attributes, used by the reviews filters */
+  data?: Record<string, string>;
+}
+
+interface Props {
+  items: FilmItem[];
+  layout: FilmLayout;
+  columns?: Columns;
+  ranked?: boolean;
+  /** Number of the first item, when showing part of a ranked list */
+  start?: number;
+  id?: string;
+}
+
+const { items, layout, columns = '4', ranked = false, start = 1, id } = Astro.props;
+const cols = Number(columns);
+const sizes = layout === 'list' ? '4.5rem' : `(min-width: 48rem) calc(38rem / ${cols}), ${cols > 2 ? '50vw' : '100vw'}`;
+const isRemote = (p: FilmItem['poster']): p is Poster => !!p && 'srcset' in p;
+const Tag = ranked ? 'ol' : 'ul';
+---
+
+<Tag class:list={['films', layout]} id={id} data-cols={columns} style={`--n: ${cols}`} start={ranked ? start : undefined}>
+  {
+    items.map((film, i) => {
+      const label = `${film.title}${film.year ? ` (${film.year})` : ''}`;
+      const poster = isRemote(film.poster) ? (
+        <img src={film.poster.src} srcset={film.poster.srcset} sizes={sizes} alt="" width="342" height="513" loading="lazy" decoding="async" />
+      ) : film.poster ? (
+        <Image src={film.poster} alt="" widths={[185, 342, 500]} sizes={sizes} loading="lazy" />
+      ) : (
+        <span class="card" aria-hidden="true">
+          {film.title}
+        </span>
+      );
+      const linkProps = film.external ? { rel: 'noopener', target: '_blank' } : {};
+      return (
+        <li class="film reveal" {...Object.fromEntries(Object.entries(film.data ?? {}).map(([k, v]) => [`data-${k}`, v]))}>
+          {film.href ? (
+            <a class="poster" href={film.href} tabindex="-1" aria-hidden="true" {...linkProps}>
+              {poster}
+            </a>
+          ) : (
+            <span class="poster">{poster}</span>
+          )}
+          <div class="text">
+            <p class="title">
+              {ranked && <span class="rank">{start + i}.</span>}
+              {film.href ? (
+                <a href={film.href} {...linkProps}>
+                  {label}
+                </a>
+              ) : (
+                label
+              )}
+            </p>
+            {film.meta && <p class="muted">{film.meta}</p>}
+            {film.note && <p class="note">{film.note}</p>}
+          </div>
+        </li>
+      );
+    })
+  }
+</Tag>
+
+<style>
+  .films {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .poster {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: var(--line);
+  }
+
+  .poster :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s var(--ease);
+  }
+
+  a.poster:hover :global(img) {
+    transform: scale(1.03);
+  }
+
+  /* Title card for films without a poster */
+  .card {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1ch;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 0.8125em;
+    line-height: 1.25;
+    color: var(--muted);
+  }
+
+  .title {
+    text-transform: uppercase;
+  }
+
+  .rank {
+    margin-right: 1ch;
+    color: var(--muted);
+  }
+
+  /* Poster grid */
+  .posters {
+    --cols: var(--n);
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: 1.5lh 2ch;
+    font-size: 0.875em;
+  }
+
+  .posters .text {
+    margin-top: 0.5lh;
+  }
+
+  .posters .note {
+    margin-top: 0.25lh;
+  }
+
+  @media (max-width: 40rem) {
+    .posters[data-cols='3'],
+    .posters[data-cols='4'] {
+      --cols: 2;
+    }
+  }
+
+  /* Numbered list with notes */
+  .list {
+    display: grid;
+    gap: 1.5lh;
+  }
+
+  .list .film {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 2ch;
+    align-items: start;
+  }
+
+  .list .note {
+    margin-top: 0.5lh;
+  }
+
+  .list .card {
+    font-size: 0.625em;
+  }
+</style>

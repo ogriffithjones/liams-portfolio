@@ -32,6 +32,30 @@ blocks:
     value:
       heading: INT. WORK — DAY
       items: []
+      columns: '3'
+      aspect: wide
+      width: wide
+      captions: full
+      preview: hover
+  - discriminant: transition
+    value:
+      text: 'CUT TO:'
+  - discriminant: reviews
+    value:
+      heading: INT. REVIEWS — NIGHT
+      count: 4
+      layout: posters
+      columns: '4'
+  - discriminant: transition
+    value:
+      text: 'CUT TO:'
+  - discriminant: list
+    value:
+      heading: INT. VIDEO SHOP — DAY
+      list: list-title-one
+      count: 8
+      layout: posters
+      columns: '4'
   - discriminant: transition
     value:
       text: 'CUT TO:'

@@ -1,62 +1,187 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import { aspectRatio, type Aspect, type Captions, type Columns, type Preview, type Width } from '../../lib/options';
+import { parseVideo } from '../../lib/video';
 
 interface Props {
   work: CollectionEntry<'work'>[];
   /** Slugs chosen in the CMS, in order. Empty means all work. */
   items: (string | null)[];
+  columns: Columns;
+  aspect: Aspect;
+  width: Width;
+  captions: Captions;
+  preview: Preview;
 }
 
-const { work, items } = Astro.props;
+const { work, items, columns, aspect, width, captions, preview } = Astro.props;
 const chosen = items.filter((slug): slug is string => !!slug);
 const list = chosen.length
   ? chosen.map((slug) => work.find((w) => w.id === slug)).filter((w) => w !== undefined)
   : work;
+
+const cols = Number(columns);
+const base = { script: '38rem', wide: '76rem', full: '100vw' }[width];
+const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' : '100vw'}`;
 ---
 
-<div class="work">
+<div class:list={['grid', width !== 'script' && `bleed bleed-${width}`]} data-cols={columns} data-aspect={aspect} style={`--n: ${cols}; --ratio: ${aspectRatio[aspect]}`}>
   {
-    list.map(({ data }) => (
-      <article class="reveal">
-        {data.image && (
-          <Image
-            src={data.image}
-            alt={data.imageAlt ?? ''}
-            widths={[480, 720, 960, 1280]}
-            sizes="(min-width: 42rem) 38rem, 100vw"
-            loading="lazy"
-          />
-        )}
-        <h3>
-          {data.link ? (
-            <a href={data.link} rel="noopener" target="_blank">
-              {data.title}
-            </a>
+    list.map(({ data }) => {
+      const video = parseVideo(data.video);
+      const alt = data.imageAlt ?? '';
+      const media = (
+        <>
+          {data.image ? (
+            <Image src={data.image} alt={alt} widths={[360, 540, 720, 1080, 1440, 1920]} sizes={sizes} loading="lazy" />
+          ) : video?.thumbnail ? (
+            <img
+              src={video.thumbnail}
+              alt={alt}
+              loading="lazy"
+              decoding="async"
+              onerror={`this.onerror=null;this.src='https://i.ytimg.com/vi/${video.id}/hqdefault.jpg'`}
+            />
           ) : (
-            data.title
-          )}{' '}
-          ({data.year})
-        </h3>
-        {data.role && <p class="muted">{data.role}</p>}
-        {data.description && <p class="desc">{data.description}</p>}
-      </article>
-    ))
+            <span class="blank" />
+          )}
+          {data.loop && preview !== 'off' && (
+            <video data-loop={preview} src={data.loop} muted loop playsinline preload="none" aria-hidden="true" />
+          )}
+        </>
+      );
+      return (
+        <article class="tile reveal">
+          <div class="frame">
+            {video ? (
+              <button type="button" class="hit" data-video={video.embed} data-title={data.title} aria-label={`Play ${data.title}`}>
+                {media}
+                <span class="play" aria-hidden="true">▶ Play</span>
+              </button>
+            ) : data.link ? (
+              <a class="hit" href={data.link} rel="noopener" target="_blank" aria-label={data.title}>
+                {media}
+              </a>
+            ) : (
+              media
+            )}
+          </div>
+          {captions === 'none' ? (
+            <h3 class="visually-hidden">{data.title}</h3>
+          ) : (
+            <div class="caption">
+              <h3>
+                {data.link ? (
+                  <a href={data.link} rel="noopener" target="_blank">
+                    {data.title}
+                  </a>
+                ) : (
+                  data.title
+                )}{' '}
+                ({data.year})
+              </h3>
+              {captions === 'full' && data.role && <p class="muted">{data.role}</p>}
+              {captions === 'full' && data.description && <p class="desc">{data.description}</p>}
+            </div>
+          )}
+        </article>
+      );
+    })
   }
 </div>
 
 <style>
-  .work {
+  .grid {
+    --cols: var(--n);
     display: grid;
-    gap: 3lh;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: 2.5lh 2ch;
   }
 
-  .work :global(img) {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    margin-bottom: 1lh;
+  .grid[data-cols='1'] {
+    row-gap: 3lh;
+  }
+
+  @media (max-width: 40rem) {
+    .grid[data-cols='3'],
+    .grid[data-cols='4'] {
+      --cols: 2;
+    }
+  }
+
+  /* Landscape shapes are too small two-up on a phone */
+  @media (max-width: 30rem) {
+    .grid:is([data-aspect='wide'], [data-aspect='scope'], [data-aspect='classic']) {
+      --cols: 1;
+    }
+  }
+
+  .frame {
+    position: relative;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
     background: var(--line);
+  }
+
+  .hit {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .frame :global(img),
+  .frame video,
+  .blank {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition:
+      opacity 0.5s var(--ease),
+      transform 0.8s var(--ease);
+  }
+
+  .frame video {
+    opacity: 0;
+  }
+
+  .frame video:global(.playing) {
+    opacity: 1;
+  }
+
+  .hit:hover :global(img) {
+    transform: scale(1.015);
+  }
+
+  .play {
+    position: absolute;
+    left: 1ch;
+    bottom: 0.5lh;
+    padding: 0.15lh 1ch;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 0.875em;
+    text-transform: uppercase;
+    opacity: 0.92;
+    transition: opacity 0.3s var(--ease);
+  }
+
+  .hit:hover .play,
+  .hit:focus-visible .play {
+    opacity: 1;
+  }
+
+  .caption {
+    margin-top: 0.75lh;
   }
 
   h3 {
@@ -64,7 +189,11 @@ const list = chosen.length
     text-transform: uppercase;
   }
 
+  .grid:not([data-cols='1']) .caption {
+    font-size: 0.875em;
+  }
+
   .desc {
-    margin-top: 1lh;
+    margin-top: 0.5lh;
   }
 </style>

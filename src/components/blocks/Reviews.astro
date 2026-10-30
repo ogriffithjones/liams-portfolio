@@ -1,0 +1,25 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Films from '../Films.astro';
+import { reviewItems } from '../../lib/reviews';
+import type { Columns, FilmLayout } from '../../lib/options';
+
+interface Props {
+  reviews: CollectionEntry<'reviews'>[];
+  count: number | null | undefined;
+  layout: FilmLayout;
+  columns: Columns;
+}
+
+const { reviews, count, layout, columns } = Astro.props;
+const items = await reviewItems(reviews.slice(0, count || 4), { withExcerpt: layout === 'list' });
+---
+
+<Films items={items} layout={layout} columns={columns} />
+<p class="more"><a href="/reviews">All {reviews.length} reviews →</a></p>
+
+<style>
+  .more {
+    margin-top: 1.5lh;
+  }
+</style>

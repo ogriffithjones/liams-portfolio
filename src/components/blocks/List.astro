@@ -1,0 +1,50 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Films from '../Films.astro';
+import { getListFilms } from '../../lib/lists';
+import type { Columns, FilmLayout } from '../../lib/options';
+
+interface Props {
+  list: CollectionEntry<'lists'>;
+  count: number | null | undefined;
+  layout: FilmLayout;
+  columns: Columns;
+}
+
+const { list, count, layout, columns } = Astro.props;
+const films = await getListFilms(list);
+const shown = count ? films.slice(0, count) : films;
+---
+
+<div class="sp">
+  <p class="title"><a href={`/lists/${list.id}`}>{list.data.title}</a></p>
+  {list.data.summary && <p>{list.data.summary}</p>}
+</div>
+<div class="list-films">
+  <Films
+    items={shown.map((f) => ({ title: f.title, year: f.year, href: f.url, external: true, poster: f.poster, note: f.note }))}
+    layout={layout}
+    columns={columns}
+    ranked={list.data.ranked}
+  />
+</div>
+<p class="more"><a href={`/lists/${list.id}`}>{shown.length < films.length ? `See all ${films.length} films →` : 'Open the list →'}</a></p>
+
+<style>
+  .title {
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .sp > * + * {
+    margin-top: 0.5lh;
+  }
+
+  .list-films {
+    margin-top: 1.5lh;
+  }
+
+  .more {
+    margin-top: 1.5lh;
+  }
+</style>

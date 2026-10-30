@@ -1,0 +1,15 @@
+Letterboxd list export v7
+Date,Name,Tags,URL,Description
+2026-10-01,List Title One,,,List description placeholder
+
+Position,Name,Year,URL,Description
+1,Film Title One,2026,,"Note placeholder from the Letterboxd export, with a comma, and ""quotes""."
+2,Film Title Two,1999,,
+3,Film Title Three,1984,,This note is replaced by the CMS one.
+4,Film Title Four,2011,,
+5,Film Title Five,1975,,Note placeholder.
+6,Film Title Six,2003,,
+7,Film Title Seven,1962,,
+8,Film Title Eight,2019,,
+9,Film Title Nine,1994,,
+10,Film Title Ten,2008,,Last note placeholder.

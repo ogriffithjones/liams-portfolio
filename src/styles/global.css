@@ -35,6 +35,8 @@ body {
   font-family: var(--font-script), 'Courier New', monospace;
   font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.0625rem);
   line-height: 1.35;
+  /* Wide blocks break out of the column; never cause sideways scroll */
+  overflow-x: clip;
 }
 
 img {
@@ -71,6 +73,30 @@ p {
 
 .muted {
   color: var(--muted);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Blocks set to Wide or Full width, centred on the page */
+.bleed {
+  position: relative;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.bleed-wide {
+  width: min(76rem, calc(100vw - var(--gutter) * 2));
+}
+
+.bleed-full {
+  width: calc(100vw - var(--gutter) * 2);
 }
 
 .skip {

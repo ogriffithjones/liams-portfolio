@@ -1,12 +1,15 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { aspects, captions, columns, filmLayouts, previews, ratings, widths } from './lib/options';
 
 // These schemas mirror keystatic.config.ts. Keystatic edits the files,
 // Astro reads them at build time and optimises the images.
 
 const optional = z.string().optional();
 const heading = z.string().default('');
+const int = z.number().int().nullish();
+const url = z.url().nullish().or(z.literal(''));
 
 const block = <K extends string, V extends z.ZodType>(discriminant: K, value: V) =>
   z.object({ discriminant: z.literal(discriminant), value });
@@ -27,9 +30,39 @@ const home = defineCollection({
             }),
           ),
           block('transition', z.object({ text: z.string().default('CUT TO:') })),
-          block('watching', z.object({ heading, username: z.string().default(''), count: z.number().int().nullish() })),
-          block('work', z.object({ heading, items: z.array(z.string().nullable()).default([]) })),
-          block('notes', z.object({ heading, limit: z.number().int().nullish() })),
+          block('watching', z.object({ heading, username: z.string().default(''), count: int })),
+          block(
+            'work',
+            z.object({
+              heading,
+              items: z.array(z.string().nullable()).default([]),
+              columns: z.enum(columns.values).default('1'),
+              aspect: z.enum(aspects.values).default('wide'),
+              width: z.enum(widths.values).default('script'),
+              captions: z.enum(captions.values).default('full'),
+              preview: z.enum(previews.values).default('hover'),
+            }),
+          ),
+          block(
+            'reviews',
+            z.object({
+              heading,
+              count: int,
+              layout: z.enum(filmLayouts.values).default('posters'),
+              columns: z.enum(columns.values).default('4'),
+            }),
+          ),
+          block(
+            'list',
+            z.object({
+              heading,
+              list: z.string().nullish(),
+              count: int,
+              layout: z.enum(filmLayouts.values).default('posters'),
+              columns: z.enum(columns.values).default('4'),
+            }),
+          ),
+          block('notes', z.object({ heading, limit: int })),
           block('text', z.object({ heading, body: z.string().default('') })),
           block('contact', z.object({ heading })),
         ]),
@@ -46,6 +79,7 @@ const site = defineCollection({
     email: optional,
     location: optional,
     links: z.array(z.object({ label: z.string(), url: z.url() })).default([]),
+    reviewsPage: z.boolean().default(true),
     seoDescription: optional,
   }),
 });
@@ -58,10 +92,51 @@ const work = defineCollection({
       year: z.number().int(),
       role: optional,
       description: optional,
-      link: z.url().nullish().or(z.literal('')),
+      video: url,
       image: image().nullish(),
       imageAlt: optional,
+      loop: z.string().nullish(),
+      link: url,
     }),
+});
+
+const reviews = defineCollection({
+  loader: glob({ pattern: '*.mdoc', base: './src/content/reviews' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      year: int,
+      director: optional,
+      rating: z
+        .enum(ratings.values)
+        .default('')
+        .transform((r) => (r ? Number(r) : null)),
+      watched: z.coerce.date(),
+      rewatch: z.boolean().default(false),
+      liked: z.boolean().default(false),
+      tags: z.array(z.string()).default([]),
+      poster: image().nullish(),
+      tmdbId: int,
+      letterboxd: url,
+      draft: z.boolean().default(false),
+    }),
+});
+
+const lists = defineCollection({
+  loader: glob({ pattern: '*.mdoc', base: './src/content/lists' }),
+  schema: z.object({
+    title: z.string(),
+    summary: optional,
+    ranked: z.boolean().default(true),
+    layout: z.enum(filmLayouts.values).default('posters'),
+    columns: z.enum(columns.values).default('4'),
+    letterboxdCsv: z.string().nullish(),
+    films: z
+      .array(z.object({ title: z.string(), year: int, tmdbId: int, note: z.string().default('') }))
+      .default([]),
+    letterboxd: url,
+    draft: z.boolean().default(false),
+  }),
 });
 
 const notes = defineCollection({
@@ -75,4 +150,4 @@ const notes = defineCollection({
   }),
 });
 
-export const collections = { home, site, work, notes };
+export const collections = { home, site, work, reviews, lists, notes };

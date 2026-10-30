@@ -1,4 +1,5 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
+import { aspects, captions, columns, filmLayouts, previews, ratings, widths } from './src/lib/options';
 
 // Locally, edits are written straight to the files in this repo.
 // In production, set PUBLIC_KEYSTATIC_GITHUB_REPO (e.g. "owner/liams-portfolio")
@@ -13,6 +14,13 @@ const sceneHeading = (defaultValue: string) =>
     description: 'Section title, screenplay style. e.g. INT. WORK — DAY',
     defaultValue,
   });
+
+const select = <T extends { options: { value: string; label: string }[] }>(
+  label: string,
+  choice: T,
+  defaultValue: T['options'][number]['value'],
+  description?: string,
+) => fields.select({ label, options: choice.options, defaultValue, ...(description ? { description } : {}) });
 
 const elementLabels = {
   scene: 'Scene heading',
@@ -37,13 +45,22 @@ const scriptElement = fields.object({
   }),
 });
 
+const filmFields = {
+  title: fields.text({ label: 'Film title', validation: { isRequired: true } }),
+  year: fields.integer({ label: 'Release year', description: 'Helps find the right poster' }),
+  tmdbId: fields.integer({
+    label: 'TMDB ID (optional)',
+    description: 'Only if the wrong poster shows up. The number in the film’s themoviedb.org address.',
+  }),
+};
+
 export default config({
   storage: githubRepo ? { kind: 'github', repo: githubRepo } : { kind: 'local' },
   ui: {
     brand: { name: 'Liams Portfolio' },
     navigation: {
       Pages: ['home'],
-      Content: ['work', 'notes'],
+      Content: ['work', 'reviews', 'lists', 'notes'],
       Settings: ['site'],
     },
   },
@@ -90,7 +107,7 @@ export default config({
             },
             work: {
               label: 'Work',
-              itemLabel: (props) => props.fields.heading.value || 'Work',
+              itemLabel: (props) => `${props.fields.heading.value || 'Work'} · ${props.fields.columns.value} across`,
               schema: fields.object({
                 heading: sceneHeading('INT. WORK — DAY'),
                 items: fields.array(fields.relationship({ label: 'Project', collection: 'work' }), {
@@ -98,6 +115,36 @@ export default config({
                   description: 'Pick and drag into order. Leave empty to show every project, newest first.',
                   itemLabel: (props) => props.value ?? 'Choose a project',
                 }),
+                columns: select('Columns', columns, '1'),
+                aspect: select('Image shape', aspects, 'wide'),
+                width: select('Width', widths, 'script', 'Wide and full width break out of the text column.'),
+                captions: select('Captions', captions, 'full'),
+                preview: select('Video previews', previews, 'hover', 'For projects with a preview loop uploaded.'),
+              }),
+            },
+            reviews: {
+              label: 'Reviews',
+              itemLabel: (props) => props.fields.heading.value || 'Reviews',
+              schema: fields.object({
+                heading: sceneHeading('INT. REVIEWS — NIGHT'),
+                count: fields.integer({ label: 'How many reviews', defaultValue: 4, validation: { min: 1, max: 24 } }),
+                layout: select('Layout', filmLayouts, 'posters'),
+                columns: select('Columns (poster grid)', columns, '4'),
+              }),
+            },
+            list: {
+              label: 'Film list',
+              itemLabel: (props) => `List: ${props.fields.list.value ?? 'choose a list'}`,
+              schema: fields.object({
+                heading: sceneHeading('INT. VIDEO SHOP — DAY'),
+                list: fields.relationship({ label: 'List', collection: 'lists' }),
+                count: fields.integer({
+                  label: 'How many films',
+                  description: 'Shows the first few with a link to the full list. Leave empty to show all.',
+                  defaultValue: 8,
+                }),
+                layout: select('Layout', filmLayouts, 'posters'),
+                columns: select('Columns (poster grid)', columns, '4'),
               }),
             },
             notes: {
@@ -148,6 +195,11 @@ export default config({
             itemLabel: (props) => props.fields.label.value || 'Link',
           },
         ),
+        reviewsPage: fields.checkbox({
+          label: 'Reviews page',
+          description: 'Publish /reviews (with search and filters) and a page for each review.',
+          defaultValue: true,
+        }),
         seoDescription: fields.text({
           label: 'Search description',
           description: 'Shown by Google under your name. Aim for 120–160 characters.',
@@ -169,13 +221,105 @@ export default config({
         year: fields.integer({ label: 'Year', validation: { isRequired: true } }),
         role: fields.text({ label: 'Role', description: 'e.g. Director, Editor' }),
         description: fields.text({ label: 'Description', multiline: true, validation: { length: { max: 300 } } }),
-        link: fields.url({ label: 'Link', description: 'Vimeo, YouTube, or wherever it lives' }),
+        video: fields.url({
+          label: 'Video',
+          description: 'YouTube or Vimeo link. Plays in a full-screen overlay when the still is clicked.',
+        }),
         image: fields.image({
           label: 'Still',
+          description: 'Optional for YouTube videos (their thumbnail is used). Recommended for everything else.',
           directory: 'src/assets/work',
           publicPath: '../../assets/work/',
         }),
         imageAlt: fields.text({ label: 'Still description (alt text)' }),
+        loop: fields.file({
+          label: 'Preview loop',
+          description: 'Optional short, silent MP4 that plays in the tile. Keep it under about 8 MB.',
+          directory: 'public/media/work',
+          publicPath: '/media/work/',
+        }),
+        link: fields.url({ label: 'Link', description: 'Optional: where the title links to (festival page, credits, etc.)' }),
+      },
+    }),
+    reviews: collection({
+      label: 'Reviews',
+      slugField: 'title',
+      path: 'src/content/reviews/*',
+      format: { contentField: 'content' },
+      entryLayout: 'content',
+      columns: ['title', 'watched'],
+      schema: {
+        title: fields.slug({ name: { label: 'Film title' } }),
+        year: fields.integer({ label: 'Release year' }),
+        director: fields.text({ label: 'Director' }),
+        rating: select('Rating', ratings, ''),
+        watched: fields.date({ label: 'Watched', validation: { isRequired: true }, defaultValue: { kind: 'today' } }),
+        rewatch: fields.checkbox({ label: 'Rewatch' }),
+        liked: fields.checkbox({ label: 'Liked ♥' }),
+        tags: fields.array(fields.text({ label: 'Tag' }), {
+          label: 'Tags',
+          description: 'Used for filtering, e.g. a genre, festival or cinema.',
+          itemLabel: (props) => props.value || 'Tag',
+        }),
+        poster: fields.image({
+          label: 'Poster',
+          description: 'Optional. Pulled from TMDB automatically when left empty.',
+          directory: 'src/assets/reviews',
+          publicPath: '../../assets/reviews/',
+        }),
+        tmdbId: filmFields.tmdbId,
+        letterboxd: fields.url({ label: 'Letterboxd link' }),
+        draft: fields.checkbox({ label: 'Draft', description: 'Drafts are hidden from the live site' }),
+        content: fields.markdoc({
+          label: 'Review',
+          options: { image: { directory: 'src/assets/reviews', publicPath: '../../assets/reviews/' } },
+        }),
+      },
+    }),
+    lists: collection({
+      label: 'Film lists',
+      slugField: 'title',
+      path: 'src/content/lists/*',
+      format: { contentField: 'intro' },
+      entryLayout: 'content',
+      columns: ['title'],
+      schema: {
+        title: fields.slug({ name: { label: 'Title' } }),
+        summary: fields.text({
+          label: 'Summary',
+          description: 'One sentence. Used in search results and link previews.',
+          multiline: true,
+          validation: { length: { max: 200 } },
+        }),
+        ranked: fields.checkbox({ label: 'Ranked', description: 'Number the films', defaultValue: true }),
+        layout: select('Layout', filmLayouts, 'posters'),
+        columns: select('Columns (poster grid)', columns, '4'),
+        letterboxdCsv: fields.file({
+          label: 'Letterboxd export (CSV)',
+          description:
+            'Optional. Upload a list exported from Letterboxd and its films (with any notes) are used in that order. Films added below then only add notes or poster fixes.',
+          directory: 'src/data/letterboxd',
+          publicPath: 'src/data/letterboxd/',
+        }),
+        films: fields.array(
+          fields.object({
+            ...filmFields,
+            note: fields.text({ label: 'Note', description: 'Optional comment shown with the film', multiline: true }),
+          }),
+          {
+            label: 'Films',
+            description: 'In order. With a CSV uploaded, use this only to add notes or fix posters for films in it.',
+            itemLabel: (props) =>
+              `${props.fields.title.value || 'Film'}${props.fields.year.value ? ` (${props.fields.year.value})` : ''}`,
+          },
+        ),
+        letterboxd: fields.url({ label: 'Letterboxd link', description: 'Optional link to the list on Letterboxd' }),
+        draft: fields.checkbox({ label: 'Draft', description: 'Drafts are hidden from the live site' }),
+        intro: fields.markdoc({
+          label: 'Intro',
+          description: 'Text and images shown above the films',
+          options: { image: { directory: 'src/assets/lists', publicPath: '../../assets/lists/' } },
+        }),
       },
     }),
     notes: collection({

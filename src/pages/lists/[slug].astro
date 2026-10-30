@@ -1,0 +1,68 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Films from '../../components/Films.astro';
+import { getLists, getSite } from '../../lib/content';
+import { getListFilms } from '../../lib/lists';
+
+export const getStaticPaths = (async () => {
+  const lists = await getLists();
+  return lists.map((list) => ({ params: { slug: list.id }, props: { list } }));
+}) satisfies GetStaticPaths;
+
+const { list } = Astro.props;
+const { data } = list;
+const { Content } = await render(list);
+const site = await getSite();
+const films = await getListFilms(list);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: data.title,
+  description: data.summary || undefined,
+  author: { '@type': 'Person', name: site.name },
+  numberOfItems: films.length,
+  itemListOrder: data.ranked ? 'https://schema.org/ItemListOrderAscending' : 'https://schema.org/ItemListUnordered',
+  itemListElement: films.map((f, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: { '@type': 'Movie', name: f.title, dateCreated: f.year ? String(f.year) : undefined },
+  })),
+};
+---
+
+<Base title={data.title} description={data.summary || `${data.title}: a film list by ${site.name}.`} type="article" jsonLd={jsonLd} back>
+  <article class="page">
+    <header class="sp head">
+      <h1 class="sp-scene">{data.title}</h1>
+      <p class="muted">
+        {films.length} films{data.letterboxd && <> · <a href={data.letterboxd} rel="noopener" target="_blank">On Letterboxd</a></>}
+      </p>
+    </header>
+    <div class="prose intro">
+      <Content />
+    </div>
+    <Films
+      items={films.map((f) => ({ title: f.title, year: f.year, href: f.url, external: true, poster: f.poster, note: f.note }))}
+      layout={data.layout}
+      columns={data.columns}
+      ranked={data.ranked}
+    />
+  </article>
+</Base>
+
+<style>
+  .head {
+    padding-block: 2lh 1lh;
+  }
+
+  .head p {
+    margin-top: 0;
+  }
+
+  .intro:not(:empty) {
+    margin-bottom: 2lh;
+  }
+</style>
