@@ -1,11 +1,11 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 // Locally, edits are written straight to the files in this repo.
-// In production, set PUBLIC_KEYSTATIC_CLOUD_PROJECT ("team/project" from
-// keystatic.cloud). Editors sign in through Keystatic Cloud (no GitHub
-// account needed) and saves are committed to GitHub, which triggers a
-// Vercel rebuild.
-const cloudProject = import.meta.env.PUBLIC_KEYSTATIC_CLOUD_PROJECT as string | undefined;
+// In production, set PUBLIC_KEYSTATIC_GITHUB_REPO (e.g. "owner/liams-portfolio")
+// and edits are committed to GitHub, which triggers a Vercel rebuild.
+const githubRepo = import.meta.env.PUBLIC_KEYSTATIC_GITHUB_REPO as
+  | `${string}/${string}`
+  | undefined;
 
 const sceneHeading = (defaultValue: string) =>
   fields.text({
@@ -38,8 +38,7 @@ const scriptElement = fields.object({
 });
 
 export default config({
-  storage: cloudProject ? { kind: 'cloud' } : { kind: 'local' },
-  ...(cloudProject ? { cloud: { project: cloudProject } } : {}),
+  storage: githubRepo ? { kind: 'github', repo: githubRepo } : { kind: 'local' },
   ui: {
     brand: { name: 'Liams Portfolio' },
     navigation: {
