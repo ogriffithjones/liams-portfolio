@@ -35,6 +35,10 @@ export default defineConfig({
   ],
   adapter: vercel(),
   trailingSlash: 'never',
+  // Keystatic's editor only runs at /keystatic, so /admin is a shortcut to it.
+  redirects: {
+    '/admin': { status: 302, destination: '/keystatic' },
+  },
   build: { inlineStylesheets: 'always' },
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   image: {
@@ -45,6 +49,6 @@ export default defineConfig({
     react(),
     markdoc(),
     keystatic(),
-    sitemap({ filter: (page) => !page.includes('/keystatic') }),
+    sitemap({ filter: (page) => !/\/(keystatic|admin)(\/|$)/.test(new URL(page).pathname) }),
   ],
 });

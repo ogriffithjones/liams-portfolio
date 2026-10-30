@@ -5,6 +5,7 @@ export const GET: APIRoute = ({ site }) =>
     `User-agent: *
 Allow: /
 Disallow: /keystatic
+Disallow: /admin
 Disallow: /api/
 
 Sitemap: ${new URL('sitemap-index.xml', site).href}

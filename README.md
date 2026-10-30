@@ -3,7 +3,7 @@
 Liam Dunstan's portfolio: one page laid out like a screenplay, plus a page for each note on film.
 
 - **Astro 7**: every page is pre-rendered to static HTML. Public pages ship about 1 KB of JavaScript.
-- **Keystatic CMS** at `/keystatic`: content lives in this repo as YAML/Markdoc files, so there's no database or CMS subscription.
+- **Keystatic CMS** at `/admin` (redirects to `/keystatic`, where the editor runs): content lives in this repo as YAML/Markdoc files, so there's no database or CMS subscription.
 - **Vercel** hosting: static pages on the CDN. Only the CMS and the Letterboxd block run as functions.
 
 ## Editing content
@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open <http://127.0.0.1:4321/keystatic>. Locally, saving writes straight to the files in `src/content/`.
+Open <http://127.0.0.1:4321/admin>. Locally, saving writes straight to the files in `src/content/`.
 
 | CMS section | What it controls |
 | --- | --- |
@@ -46,13 +46,13 @@ The name on the title page always comes first, so the page always has its `<h1>`
 
 ### Letting Liam edit the live site
 
-In production, Keystatic saves by committing to GitHub. Each commit triggers a Vercel rebuild, and the change is live in about a minute.
+In production, Keystatic saves by committing to GitHub. Each commit triggers a Vercel rebuild, and the change is live in about a minute. There is no separate password: Liam signs in with his GitHub account, which needs write access to the repo. Until `PUBLIC_KEYSTATIC_GITHUB_REPO` is set, `/admin` and `/keystatic` return 404 on the live site.
 
-1. Add `PUBLIC_KEYSTATIC_GITHUB_REPO=owner/repo-name` to a local `.env`, run `npm run dev` and open `/keystatic`.
+1. Add `PUBLIC_KEYSTATIC_GITHUB_REPO=owner/repo-name` to a local `.env`, run `npm run dev` and open `/admin`.
 2. Follow the prompt to create the Keystatic GitHub App. It writes `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET` and `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` into `.env`.
 3. Copy all five variables into Vercel's environment variables and redeploy.
 4. In the GitHub App settings, add `https://<your-domain>/api/keystatic/github/oauth/callback` as a callback URL.
-5. Liam signs in at `https://<your-domain>/keystatic` with a GitHub account that has write access to the repo.
+5. Liam signs in at `https://<your-domain>/admin` with a GitHub account that has write access to the repo.
 
 `.env.example` lists every variable.
 
