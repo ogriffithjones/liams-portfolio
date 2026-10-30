@@ -46,13 +46,14 @@ The name on the title page always comes first, so the page always has its `<h1>`
 
 ### Letting Liam edit the live site
 
-In production, Keystatic saves by committing to GitHub. Each commit triggers a Vercel rebuild, and the change is live in about a minute. There is no separate password: Liam signs in with his GitHub account, which needs write access to the repo. Until `PUBLIC_KEYSTATIC_GITHUB_REPO` is set, `/admin` and `/keystatic` return 404 on the live site.
+The live editor uses [Keystatic Cloud](https://keystatic.com/docs/cloud) for sign-in, so Liam doesn't need a GitHub account. Saves are still committed to this repo on GitHub, and each commit triggers a Vercel rebuild, so changes are live in about a minute. The free plan covers up to 3 people per team.
 
-1. Add `PUBLIC_KEYSTATIC_GITHUB_REPO=owner/repo-name` to a local `.env`, run `npm run dev` and open `/admin`.
-2. Follow the prompt to create the Keystatic GitHub App. It writes `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET` and `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` into `.env`.
-3. Copy all five variables into Vercel's environment variables and redeploy.
-4. In the GitHub App settings, add `https://<your-domain>/api/keystatic/github/oauth/callback` as a callback URL.
-5. Liam signs in at `https://<your-domain>/admin` with a GitHub account that has write access to the repo.
+1. Sign up at [keystatic.cloud](https://keystatic.cloud), create a team and a project, and connect the project to this GitHub repo.
+2. In Vercel, add `PUBLIC_KEYSTATIC_CLOUD_PROJECT` set to the project's `team/project` name (shown on its settings page), then redeploy.
+3. Invite Liam to the team in Keystatic Cloud.
+4. Liam signs in at `https://<your-domain>/admin`.
+
+Until `PUBLIC_KEYSTATIC_CLOUD_PROJECT` is set, `/admin` and `/keystatic` return 404 on the live site. Locally, leave it unset and the editor edits files on your machine with no sign-in.
 
 `.env.example` lists every variable.
 
