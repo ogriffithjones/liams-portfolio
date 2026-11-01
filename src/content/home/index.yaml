@@ -21,7 +21,6 @@ blocks:
     value:
       heading: INT. Writing— DAY
       items:
-        - jekyll-and-hyde
         - the-muppet-show
         - a-study-of-life-and-death
         - project-title-two
