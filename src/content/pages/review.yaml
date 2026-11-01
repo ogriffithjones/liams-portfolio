@@ -3,7 +3,7 @@ showTitle: true
 blocks:
   - discriminant: writing
     value:
-      heading: INT. Opinions — NIGHT
+      heading: INT. Reviews — NIGHT
       show: review
       count: 4
       layout: posters
