@@ -1,6 +1,13 @@
 title: Reviews
 showTitle: true
-blocks: []
+blocks:
+  - discriminant: watching
+    value:
+      heading: INT. SCREENING ROOM — NIGHT
+      username: '25560'
+      count: 4
+      cut: 'FADE TO:'
+      hidden: false
 ending:
   transition: FADE OUT.
   theEnd: true
