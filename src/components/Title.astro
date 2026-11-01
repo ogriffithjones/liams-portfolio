@@ -17,11 +17,6 @@ const { name, role } = await getSite();
     text-transform: uppercase;
   }
 
-  /* With halftone dots on, sit the title below the densest part */
-  :global(body:has(.halftone)) .title {
-    padding-top: clamp(8rem, 30vh, 16rem);
-  }
-
   h1 {
     font-weight: 700;
     text-decoration: underline;

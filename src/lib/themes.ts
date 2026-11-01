@@ -85,7 +85,7 @@ export const dotHeights = { short: 'Short', medium: 'Medium', tall: 'Tall' } as 
 
 /** Spacing between dot centres (px) and band height (share of the window). */
 export const dotSpacing = { fine: 8, medium: 12, bold: 18 } as const;
-export const dotBand = { short: 0.3, medium: 0.48, tall: 0.7 } as const;
+export const dotBand = { short: 0.38, medium: 0.6, tall: 0.82 } as const;
 
 export type PaletteKey = keyof typeof palettes;
 export type AccentKey = keyof typeof accents;
