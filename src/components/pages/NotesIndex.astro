@@ -1,0 +1,65 @@
+---
+// Every note / opinion piece, newest first. Name and address come from
+// Site settings → Sections.
+import Base from '../../layouts/Base.astro';
+import { formatDate, getNotes, getSite, isoDate } from '../../lib/content';
+import { getLinks } from '../../lib/paths';
+
+const site = await getSite();
+const notes = await getNotes();
+const links = await getLinks();
+const label = site.sections.notesLabel;
+---
+
+<Base title={label} description={`${label} by ${site.name}.`} back>
+  <section class="page">
+    <header class="sp head">
+      <h1 class="sp-scene">{label}</h1>
+      <p class="muted">{notes.length} {notes.length === 1 ? 'piece' : 'pieces'}</p>
+    </header>
+
+    <ol class="pieces">
+      {
+        notes.map(({ id, data }) => (
+          <li class="reveal">
+            <a class="title" href={links.note(id)}>
+              {data.title}
+            </a>
+            <p class="muted">
+              {data.film && <>{data.film} · </>}
+              <time datetime={isoDate(data.date)}>{formatDate(data.date)}</time>
+            </p>
+            {data.summary && <p>{data.summary}</p>}
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-block: 2lh;
+  }
+
+  .head p {
+    margin-top: 0;
+  }
+
+  .pieces {
+    display: grid;
+    gap: 2lh;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .title {
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  li p + p {
+    margin-top: 0.5lh;
+  }
+</style>

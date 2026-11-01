@@ -1,0 +1,173 @@
+---
+// The blocks that make up the home page and any custom page, in order.
+import Typewriter from './Typewriter.astro';
+import RecentlyWatched from './RecentlyWatched.astro';
+import Script from './blocks/Script.astro';
+import Scene from './blocks/Scene.astro';
+import Work from './blocks/Work.astro';
+import Notes from './blocks/Notes.astro';
+import Contact from './blocks/Contact.astro';
+import Reviews from './blocks/Reviews.astro';
+import List from './blocks/List.astro';
+import Theatre from './Theatre.astro';
+import { prepareBlocks, paragraphs, type Block, type Ending } from '../lib/blocks';
+import { getLists, getNotes, getReviews, getWork } from '../lib/content';
+
+interface Props {
+  blocks: Block[];
+  ending: Ending;
+}
+
+const work = await getWork();
+const notes = await getNotes();
+const reviews = await getReviews();
+const lists = await getLists();
+const blocks = prepareBlocks(Astro.props.blocks, {
+  work: work.length > 0,
+  notes: notes.length > 0,
+  reviews: reviews.length > 0,
+  lists: new Set(lists.map((l) => l.id)),
+  dev: import.meta.env.DEV,
+});
+const { ending } = Astro.props;
+const hasVideo = blocks.some(({ block }) => block.discriminant === 'work') && work.some((w) => w.data.video || w.data.loop);
+---
+
+<div class="reel">
+  {
+    blocks.map(({ block, index, scene, typed, cut }) => {
+      const id = `block-${index}`;
+      const content = (() => {
+        switch (block.discriminant) {
+          case 'script':
+            return (
+              <>
+                <Script lines={block.value.lines} typewriter={typed} firstScene={scene} />
+                {typed && <Typewriter />}
+              </>
+            );
+          case 'watching':
+            return (
+              <Scene heading={block.value.heading} scene={scene} id={id}>
+                {block.value.username ? (
+                  <RecentlyWatched server:defer username={block.value.username} count={block.value.count ?? 4}>
+                    <div slot="fallback" class="posters" aria-hidden="true">
+                      {Array.from({ length: block.value.count ?? 4 }, () => <span />)}
+                    </div>
+                  </RecentlyWatched>
+                ) : (
+                  <>
+                    <div class="posters" aria-hidden="true">
+                      {Array.from({ length: block.value.count ?? 4 }, () => <span />)}
+                    </div>
+                    <p class="muted hint">Dev only: add a Letterboxd username to this block in the CMS.</p>
+                  </>
+                )}
+              </Scene>
+            );
+          case 'work':
+            return (
+              <Scene heading={block.value.heading} scene={scene} id={id}>
+                <Work
+                  work={work}
+                  items={block.value.items}
+                  columns={block.value.columns}
+                  aspect={block.value.aspect}
+                  width={block.value.width}
+                  captions={block.value.captions}
+                  preview={block.value.preview}
+                />
+              </Scene>
+            );
+          case 'reviews':
+            return (
+              <Scene heading={block.value.heading} scene={scene} id={id}>
+                <Reviews reviews={reviews} count={block.value.count} layout={block.value.layout} columns={block.value.columns} />
+              </Scene>
+            );
+          case 'list': {
+            const list = lists.find((l) => l.id === block.value.list)!;
+            return (
+              <Scene heading={block.value.heading} scene={scene} id={id}>
+                <List list={list} count={block.value.count} layout={block.value.layout} columns={block.value.columns} />
+              </Scene>
+            );
+          }
+          case 'notes':
+            return (
+              <Scene heading={block.value.heading} scene={scene} id={id}>
+                <Notes notes={notes} limit={block.value.limit} />
+              </Scene>
+            );
+          case 'text':
+            return (
+              <Scene heading={block.value.heading} scene={scene} id={id}>
+                <div class="text reveal">
+                  {paragraphs(block.value.body).map((p) => <p>{p}</p>)}
+                </div>
+              </Scene>
+            );
+          case 'contact':
+            return (
+              <Scene heading={block.value.heading} scene={scene} id={id}>
+                <Contact />
+              </Scene>
+            );
+        }
+      })();
+      return (
+        <>
+          {cut && (
+            <p class="page sp-transition" aria-hidden="true">
+              {cut}
+            </p>
+          )}
+          {content}
+        </>
+      );
+    })
+  }
+  {
+    ending.transition && (
+      <p class="page sp-transition" aria-hidden="true">
+        {ending.transition}
+      </p>
+    )
+  }
+  {ending.theEnd && <p class="page sp-centered">The end</p>}
+</div>
+
+{hasVideo && <Theatre />}
+
+<style>
+  /* Two blank lines between blocks, like the gap between scenes */
+  .reel > :global(* + *) {
+    margin-top: 2lh;
+  }
+
+  .posters {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1lh 2ch;
+  }
+
+  .posters span {
+    aspect-ratio: 2 / 3;
+    background: var(--line);
+  }
+
+  @media (max-width: 34rem) {
+    .posters {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .hint {
+    margin-top: 1lh;
+    font-size: 0.875em;
+  }
+
+  .text p + p {
+    margin-top: 1lh;
+  }
+</style>

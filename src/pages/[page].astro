@@ -1,0 +1,27 @@
+---
+// Top-level pages: custom pages from the CMS, plus the reviews and notes
+// listing pages, each at the address set in Site settings → Sections.
+import type { GetStaticPaths } from 'astro';
+import CustomPage from '../components/pages/CustomPage.astro';
+import NotesIndex from '../components/pages/NotesIndex.astro';
+import ReviewsIndex from '../components/pages/ReviewsIndex.astro';
+import { getNotes, getReviews, getSite } from '../lib/content';
+import { getPages, getPaths } from '../lib/paths';
+
+export const getStaticPaths = (async () => {
+  const paths = await getPaths();
+  const site = await getSite();
+  const pages = await getPages();
+  return [
+    ...pages.map((page) => ({ params: { page: page.id }, props: { kind: 'page' as const, page } })),
+    ...((await getReviews()).length ? [{ params: { page: paths.reviews }, props: { kind: 'reviews' as const } }] : []),
+    ...(site.sections.notesPage && (await getNotes()).length ? [{ params: { page: paths.notes }, props: { kind: 'notes' as const } }] : []),
+  ];
+}) satisfies GetStaticPaths;
+
+const props = Astro.props;
+---
+
+{props.kind === 'page' && <CustomPage page={props.page} />}
+{props.kind === 'reviews' && <ReviewsIndex />}
+{props.kind === 'notes' && <NotesIndex />}

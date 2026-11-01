@@ -1,7 +1,8 @@
-import { getEntry, type CollectionEntry } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 
-type Home = CollectionEntry<'home'>['data'];
-export type Block = Home['blocks'][number];
+type PageData = CollectionEntry<'home'>['data'];
+export type Block = PageData['blocks'][number];
+export type Ending = PageData['ending'];
 export type ScriptLine = Extract<Block, { discriminant: 'script' }>['value']['lines'][number];
 
 interface Available {
@@ -14,13 +15,10 @@ interface Available {
 }
 
 /**
- * Home page blocks in CMS order, without hidden or empty ones, with scene
+ * A page's blocks in CMS order, without hidden or empty ones, with scene
  * numbers worked out and the transition to print before each.
  */
-export async function getHome(available: Available) {
-  const home = (await getEntry('home', 'index'))?.data;
-  const blocks = home?.blocks ?? [];
-
+export function prepareBlocks(blocks: Block[], available: Available) {
   const isEmpty = (b: Block) =>
     (b.discriminant === 'watching' && !b.value.username && !available.dev) ||
     (b.discriminant === 'work' && !available.work) ||
@@ -35,7 +33,7 @@ export async function getHome(available: Available) {
   const typedIndex = visible.findIndex((b) => b.discriminant === 'script' && b.value.typewriter);
 
   let scene = 1;
-  const shown = visible.map((block, index) => {
+  return visible.map((block, index) => {
     const firstScene = scene;
     if (block.discriminant === 'script') scene += block.value.lines.filter((l) => l.kind === 'scene' && l.text.trim()).length;
     else if ('heading' in block.value && block.value.heading) scene++;
@@ -48,8 +46,6 @@ export async function getHome(available: Available) {
       cut: index === 0 ? '' : block.value.cut,
     };
   });
-
-  return { blocks: shown, ending: home?.ending ?? { transition: 'FADE OUT.', theEnd: true } };
 }
 
 export const paragraphs = (text: string) =>

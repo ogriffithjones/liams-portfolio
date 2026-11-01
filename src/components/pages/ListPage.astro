@@ -1,15 +1,14 @@
 ---
-import type { GetStaticPaths } from 'astro';
+import type { CollectionEntry } from 'astro:content';
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Films from '../../components/Films.astro';
-import { getLists, getSite } from '../../lib/content';
+import { getSite } from '../../lib/content';
 import { getListFilms } from '../../lib/lists';
 
-export const getStaticPaths = (async () => {
-  const lists = await getLists();
-  return lists.map((list) => ({ params: { slug: list.id }, props: { list } }));
-}) satisfies GetStaticPaths;
+interface Props {
+  list: CollectionEntry<'lists'>;
+}
 
 const { list } = Astro.props;
 const { data } = list;

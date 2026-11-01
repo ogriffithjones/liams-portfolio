@@ -1,0 +1,34 @@
+---
+// One page per note, review, film list and project with a script, under each
+// section's address from Site settings → Sections (e.g. /opinion/my-piece).
+import type { GetStaticPaths } from 'astro';
+import NotePage from '../../components/pages/NotePage.astro';
+import ReviewPage from '../../components/pages/ReviewPage.astro';
+import ListPage from '../../components/pages/ListPage.astro';
+import WorkPage from '../../components/pages/WorkPage.astro';
+import { getLists, getNotes, getReviews, getWork } from '../../lib/content';
+import { getPaths } from '../../lib/paths';
+import { hasExcerpt } from '../../lib/screenplay';
+
+export const getStaticPaths = (async () => {
+  const paths = await getPaths();
+  return [
+    ...(await getNotes()).map((note) => ({ params: { base: paths.notes, slug: note.id }, props: { kind: 'note' as const, note } })),
+    ...(await getReviews()).map((review) => ({
+      params: { base: paths.reviews, slug: review.id },
+      props: { kind: 'review' as const, review },
+    })),
+    ...(await getLists()).map((list) => ({ params: { base: paths.lists, slug: list.id }, props: { kind: 'list' as const, list } })),
+    ...(await getWork())
+      .filter((w) => hasExcerpt(w.data))
+      .map((project) => ({ params: { base: paths.work, slug: project.id }, props: { kind: 'work' as const, project } })),
+  ];
+}) satisfies GetStaticPaths;
+
+const props = Astro.props;
+---
+
+{props.kind === 'note' && <NotePage note={props.note} />}
+{props.kind === 'review' && <ReviewPage review={props.review} />}
+{props.kind === 'list' && <ListPage list={props.list} />}
+{props.kind === 'work' && <WorkPage project={props.project} />}

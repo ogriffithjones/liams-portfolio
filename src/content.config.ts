@@ -25,52 +25,65 @@ const block = <K extends string, S extends z.ZodRawShape>(discriminant: K, shape
 
 export const scriptKinds = ['scene', 'action', 'character', 'parenthetical', 'dialogue', 'transition', 'centered'] as const;
 
+// The building blocks for the home page and every other page
+const pageBlocks = z
+    .array(
+      z.discriminatedUnion('discriminant', [
+        block(
+          'script',
+          {
+            typewriter: z.boolean().default(false),
+            lines: z.array(z.object({ kind: z.enum(scriptKinds), text: z.string().default('') })).default([]),
+          },
+          '',
+        ),
+        block('watching', { heading, username: z.string().default(''), count: int }),
+        block('work', {
+          heading,
+          items: z.array(z.string().nullable()).default([]),
+          columns: z.enum(columns.values).default('1'),
+          aspect: z.enum(aspects.values).default('wide'),
+          width: z.enum(widths.values).default('script'),
+          captions: z.enum(captions.values).default('full'),
+          preview: z.enum(previews.values).default('hover'),
+        }),
+        block('reviews', {
+          heading,
+          count: int,
+          layout: z.enum(filmLayouts.values).default('posters'),
+          columns: z.enum(columns.values).default('4'),
+        }),
+        block('list', {
+          heading,
+          list: z.string().nullish(),
+          count: int,
+          layout: z.enum(filmLayouts.values).default('posters'),
+          columns: z.enum(columns.values).default('4'),
+        }),
+        block('notes', { heading, limit: int }),
+        block('text', { heading, body: z.string().default('') }),
+        block('contact', { heading }),
+      ]),
+    )
+    .default([]);
+
+const pageEnding = z
+    .object({ transition: z.enum(endings.values).default('FADE OUT.'), theEnd: z.boolean().default(true) })
+    .default({ transition: 'FADE OUT.', theEnd: true });
+
 const home = defineCollection({
   loader: glob({ pattern: 'index.yaml', base: './src/content/home' }),
+  schema: z.object({ blocks: pageBlocks, ending: pageEnding }),
+});
+
+const pages = defineCollection({
+  loader: glob({ pattern: '*.yaml', base: './src/content/pages' }),
   schema: z.object({
-    blocks: z
-      .array(
-        z.discriminatedUnion('discriminant', [
-          block(
-            'script',
-            {
-              typewriter: z.boolean().default(false),
-              lines: z.array(z.object({ kind: z.enum(scriptKinds), text: z.string().default('') })).default([]),
-            },
-            '',
-          ),
-          block('watching', { heading, username: z.string().default(''), count: int }),
-          block('work', {
-            heading,
-            items: z.array(z.string().nullable()).default([]),
-            columns: z.enum(columns.values).default('1'),
-            aspect: z.enum(aspects.values).default('wide'),
-            width: z.enum(widths.values).default('script'),
-            captions: z.enum(captions.values).default('full'),
-            preview: z.enum(previews.values).default('hover'),
-          }),
-          block('reviews', {
-            heading,
-            count: int,
-            layout: z.enum(filmLayouts.values).default('posters'),
-            columns: z.enum(columns.values).default('4'),
-          }),
-          block('list', {
-            heading,
-            list: z.string().nullish(),
-            count: int,
-            layout: z.enum(filmLayouts.values).default('posters'),
-            columns: z.enum(columns.values).default('4'),
-          }),
-          block('notes', { heading, limit: int }),
-          block('text', { heading, body: z.string().default('') }),
-          block('contact', { heading }),
-        ]),
-      )
-      .default([]),
-    ending: z
-      .object({ transition: z.enum(endings.values).default('FADE OUT.'), theEnd: z.boolean().default(true) })
-      .default({ transition: 'FADE OUT.', theEnd: true }),
+    title: z.string(),
+    description: optional,
+    showTitle: z.boolean().default(true),
+    blocks: pageBlocks,
+    ending: pageEnding,
   }),
 });
 
@@ -83,6 +96,36 @@ const site = defineCollection({
     location: optional,
     links: z.array(z.object({ label: z.string(), url: z.url() })).default([]),
     reviewsPage: z.boolean().default(true),
+    sections: z
+      .object({
+        notesLabel: z.string().default('Notes on film'),
+        notesPath: z.string().default('notes'),
+        notesPage: z.boolean().default(true),
+        reviewsLabel: z.string().default('Reviews'),
+        reviewsPath: z.string().default('reviews'),
+        listsPath: z.string().default('lists'),
+        workPath: z.string().default('work'),
+      })
+      .prefault({}),
+    nav: z
+      .object({
+        show: z.boolean().default(false),
+        items: z
+          .array(
+            z.discriminatedUnion('discriminant', [
+              z.object({ discriminant: z.literal('home'), value: z.object({ label: z.string().default('') }) }),
+              z.object({ discriminant: z.literal('notes'), value: z.object({ label: z.string().default('') }) }),
+              z.object({ discriminant: z.literal('reviews'), value: z.object({ label: z.string().default('') }) }),
+              z.object({
+                discriminant: z.literal('page'),
+                value: z.object({ page: z.string().nullish(), label: z.string().default('') }),
+              }),
+              z.object({ discriminant: z.literal('link'), value: z.object({ url: z.string(), label: z.string().default('') }) }),
+            ]),
+          )
+          .default([]),
+      })
+      .prefault({}),
     theme: z
       .object({
         palette: z
@@ -212,4 +255,4 @@ const notes = defineCollection({
   }),
 });
 
-export const collections = { home, site, work, reviews, lists, notes };
+export const collections = { home, pages, site, work, reviews, lists, notes };

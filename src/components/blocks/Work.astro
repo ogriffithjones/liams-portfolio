@@ -4,6 +4,7 @@ import type { CollectionEntry } from 'astro:content';
 import { aspectRatio, type Aspect, type Captions, type Columns, type Preview, type Width } from '../../lib/options';
 import { parseVideo } from '../../lib/video';
 import { hasExcerpt, loadExcerpt, scriptLabel } from '../../lib/screenplay';
+import { getLinks } from '../../lib/paths';
 
 interface Props {
   work: CollectionEntry<'work'>[];
@@ -31,6 +32,7 @@ const readLinks = new Map(
   ),
 );
 
+const links = await getLinks();
 const cols = Number(columns);
 const base = { script: '38rem', wide: '76rem', full: '100vw' }[width];
 const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' : '100vw'}`;
@@ -41,7 +43,7 @@ const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' :
     list.map(({ id, data }) => {
       const video = parseVideo(data.video);
       // Projects with a script excerpt get their own page
-      const page = hasExcerpt(data) ? `/work/${id}` : null;
+      const page = hasExcerpt(data) ? links.work(id) : null;
       const href = page ?? data.link;
       const external = page ? {} : { rel: 'noopener', target: '_blank' };
       const alt = data.imageAlt ?? '';

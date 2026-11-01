@@ -2,6 +2,7 @@ import type { CollectionEntry } from 'astro:content';
 import type { FilmItem } from '../components/Films.astro';
 import { excerpt, formatDate, isoDate, stars } from './content';
 import { getPoster } from './tmdb';
+import { getLinks } from './paths';
 
 type Review = CollectionEntry<'reviews'>;
 
@@ -15,6 +16,7 @@ export const reviewPoster = async ({ data }: Review) =>
 
 /** Reviews as film items, with the data the /reviews filters search and sort on. */
 export async function reviewItems(reviews: Review[], { withExcerpt = false } = {}): Promise<FilmItem[]> {
+  const links = await getLinks();
   return Promise.all(
     reviews.map(async (review) => {
       const { data } = review;
@@ -22,7 +24,7 @@ export async function reviewItems(reviews: Review[], { withExcerpt = false } = {
       return {
         title: data.title,
         year: data.year,
-        href: `/reviews/${review.id}`,
+        href: links.review(review.id),
         poster: await reviewPoster(review),
         meta: reviewMeta(review),
         note: withExcerpt ? text : undefined,

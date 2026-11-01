@@ -1,18 +1,17 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 // A page for each project that has a script excerpt.
-import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Excerpt from '../../components/Excerpt.astro';
 import Theatre from '../../components/Theatre.astro';
-import { getSite, getWork } from '../../lib/content';
-import { hasExcerpt, loadExcerpt, scriptLabel } from '../../lib/screenplay';
+import { getSite } from '../../lib/content';
+import { loadExcerpt, scriptLabel } from '../../lib/screenplay';
 import { parseVideo } from '../../lib/video';
 
-export const getStaticPaths = (async () => {
-  const work = await getWork();
-  return work.filter((w) => hasExcerpt(w.data)).map((project) => ({ params: { slug: project.id }, props: { project } }));
-}) satisfies GetStaticPaths;
+interface Props {
+  project: CollectionEntry<'work'>;
+}
 
 const { project } = Astro.props;
 const { data } = project;

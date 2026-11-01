@@ -1,0 +1,98 @@
+---
+// The navigation bar (Site settings → Navigation): name on the left linking
+// home, tabs on the right. A tab only shows if what it points to exists.
+import { getNotes, getReviews, getSite } from '../lib/content';
+import { getLinks, getPages } from '../lib/paths';
+
+const site = await getSite();
+const links = await getLinks();
+const pages = await getPages();
+const hasNotes = site.sections.notesPage && (await getNotes()).length > 0;
+const hasReviews = (await getReviews()).length > 0;
+
+const tabs = site.nav.items.flatMap((item) => {
+  const label = item.value.label.trim();
+  switch (item.discriminant) {
+    case 'home':
+      return [{ label: label || 'Home', href: '/' }];
+    case 'notes':
+      return hasNotes ? [{ label: label || site.sections.notesLabel, href: links.notes }] : [];
+    case 'reviews':
+      return hasReviews ? [{ label: label || site.sections.reviewsLabel, href: links.reviews }] : [];
+    case 'page': {
+      const page = pages.find((p) => p.id === item.value.page);
+      return page ? [{ label: label || page.data.title, href: links.page(page.id) }] : [];
+    }
+    case 'link':
+      return [{ label: label || new URL(item.value.url).hostname, href: item.value.url, external: true }];
+  }
+});
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const current = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+---
+
+<header class="page nav">
+  <a class="name" href="/">{site.name}</a>
+  {
+    tabs.length > 0 && (
+      <nav aria-label="Main">
+        <ul>
+          {tabs.map((tab) => (
+            <li>
+              <a
+                href={tab.href}
+                aria-current={current(tab.href) ? 'page' : undefined}
+                {...('external' in tab ? { rel: 'noopener', target: '_blank' } : {})}
+              >
+                {tab.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+</header>
+
+<style>
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5lh 3ch;
+    padding-block: 2rem;
+    text-transform: uppercase;
+    font-size: 0.875em;
+  }
+
+  .name {
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25lh 2.5ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: var(--muted);
+  }
+
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--ink);
+  }
+
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--accent, currentColor);
+  }
+</style>

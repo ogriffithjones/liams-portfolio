@@ -1,20 +1,21 @@
 ---
-import type { GetStaticPaths } from 'astro';
+import type { CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { excerpt, getReviews, getSite, isoDate } from '../../lib/content';
+import { excerpt, getSite, isoDate } from '../../lib/content';
 import { reviewMeta, reviewPoster } from '../../lib/reviews';
+import { getLinks } from '../../lib/paths';
 
-export const getStaticPaths = (async () => {
-  const reviews = await getReviews();
-  return reviews.map((review) => ({ params: { slug: review.id }, props: { review } }));
-}) satisfies GetStaticPaths;
+interface Props {
+  review: CollectionEntry<'reviews'>;
+}
 
 const { review } = Astro.props;
 const { data } = review;
 const { Content } = await render(review);
 const site = await getSite();
+const links = await getLinks();
 const poster = await reviewPoster(review);
 const label = `${data.title}${data.year ? ` (${data.year})` : ''}`;
 const description = excerpt(review.body, 155) || `${site.name} on ${label}.`;
@@ -61,7 +62,7 @@ const jsonLd = {
     <div class="prose">
       <Content />
     </div>
-    <p class="more"><a href="/reviews">← All reviews</a></p>
+    <p class="more"><a href={links.reviews}>← All {site.sections.reviewsLabel.toLowerCase()}</a></p>
   </article>
 </Base>
 

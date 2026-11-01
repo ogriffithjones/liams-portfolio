@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { formatDate, isoDate } from '../../lib/content';
+import { getLinks } from '../../lib/paths';
 
 interface Props {
   notes: CollectionEntry<'notes'>[];
@@ -9,13 +10,14 @@ interface Props {
 
 const { notes, limit } = Astro.props;
 const list = limit ? notes.slice(0, limit) : notes;
+const links = await getLinks();
 ---
 
 <ul class="notes">
   {
     list.map(({ id, data }) => (
       <li class="reveal">
-        <a href={`/notes/${id}`}>{data.title}</a>
+        <a href={links.note(id)}>{data.title}</a>
         <p class="muted">
           {data.film && <>{data.film} · </>}
           <time datetime={isoDate(data.date)}>{formatDate(data.date)}</time>

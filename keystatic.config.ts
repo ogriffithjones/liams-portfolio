@@ -35,6 +35,16 @@ const extras = (cut: string) => ({
   hidden: fields.checkbox({ label: 'Hide', description: 'Keep the block but leave it off the page.' }),
 });
 
+const address = (label: string, defaultValue: string, description?: string) =>
+  fields.text({
+    label,
+    defaultValue,
+    description: description ?? `Lower-case letters, numbers and dashes, e.g. ${defaultValue}`,
+    validation: { isRequired: true, pattern: { regex: /^[a-z0-9]+(-[a-z0-9]+)*$/, message: 'Use lower-case letters, numbers and dashes only' } },
+  });
+
+const navLabel = (defaultValue: string) => fields.text({ label: 'Tab label', defaultValue });
+
 const noFields = <K extends string>(keys: K[]) =>
   Object.fromEntries(keys.map((k) => [k, fields.empty()])) as Record<K, ReturnType<typeof fields.empty>>;
 
@@ -77,12 +87,170 @@ const filmFields = {
   }),
 };
 
+// The building blocks for the home page and every other page
+const pageBlocks = fields.blocks(
+    {
+      script: {
+        label: 'Script (screenplay lines)',
+        itemLabel: (props) => {
+          const lines = props.fields.lines.elements.map((l) => l.fields.text.value.trim()).filter(Boolean);
+          const scene = props.fields.lines.elements.find((l) => l.fields.kind.value === 'scene')?.fields.text.value;
+          return label('Script', props.fields.hidden.value, scene || lines[0] || 'empty', props.fields.typewriter.value && 'types out');
+        },
+        schema: fields.object({
+          lines: fields.array(scriptElement, {
+            label: 'Lines',
+            itemLabel: (props) =>
+              `${elementLabels[props.fields.kind.value as keyof typeof elementLabels]}: ${props.fields.text.value.slice(0, 50)}`,
+          }),
+          typewriter: fields.checkbox({
+            label: 'Type out on load',
+            description: 'Only the first script on the page types itself out.',
+            defaultValue: true,
+          }),
+          ...extras(''),
+        }),
+      },
+      watching: {
+        label: 'Recently watched (Letterboxd)',
+        itemLabel: (props) =>
+          label(
+            'Recently watched',
+            props.fields.hidden.value,
+            props.fields.heading.value,
+            props.fields.username.value ? `@${props.fields.username.value}` : 'no username',
+            `${props.fields.count.value ?? 4} films`,
+          ),
+        schema: fields.object({
+          heading: sceneHeading('INT. SCREENING ROOM — NIGHT'),
+          username: fields.text({ label: 'Letterboxd username', description: 'Hidden on the live site while empty.' }),
+          count: fields.integer({ label: 'How many films', defaultValue: 4, validation: { min: 1, max: 12 } }),
+          ...extras('CUT TO:'),
+        }),
+      },
+      work: {
+        label: 'Work (projects)',
+        itemLabel: (props) => {
+          const f = props.fields;
+          const chosen = f.items.elements.length;
+          return label(
+            'Work',
+            f.hidden.value,
+            f.heading.value,
+            chosen ? `${chosen} chosen` : 'all projects',
+            `${f.columns.value} across, ${aspects.labels[f.aspect.value as keyof typeof aspects.labels].split(' ')[0]!.toLowerCase()}`,
+          );
+        },
+        schema: fields.object({
+          heading: sceneHeading('INT. WORK — DAY'),
+          items: fields.array(fields.relationship({ label: 'Project', collection: 'work' }), {
+            label: 'Projects',
+            description: 'Pick and drag into order. Leave empty to show every project, newest first.',
+            itemLabel: (props) => (props.value ? title(props.value) : 'Choose a project'),
+          }),
+          columns: select('Columns', columns, '1'),
+          aspect: select('Image shape', aspects, 'wide'),
+          width: select('Width', widths, 'script', 'Wide and full width break out of the text column.'),
+          captions: select('Captions', captions, 'full'),
+          preview: select('Video previews', previews, 'hover', 'For projects with a preview loop uploaded.'),
+          ...extras('CUT TO:'),
+        }),
+      },
+      reviews: {
+        label: 'Reviews (latest)',
+        itemLabel: (props) =>
+          label(
+            'Reviews',
+            props.fields.hidden.value,
+            props.fields.heading.value,
+            `latest ${props.fields.count.value ?? 4}`,
+            filmLayouts.labels[props.fields.layout.value as keyof typeof filmLayouts.labels].toLowerCase(),
+          ),
+        schema: fields.object({
+          heading: sceneHeading('INT. REVIEWS — NIGHT'),
+          count: fields.integer({ label: 'How many reviews', defaultValue: 4, validation: { min: 1, max: 24 } }),
+          layout: select('Layout', filmLayouts, 'posters'),
+          columns: select('Columns (poster grid)', columns, '4'),
+          ...extras('CUT TO:'),
+        }),
+      },
+      list: {
+        label: 'Film list',
+        itemLabel: (props) =>
+          label(
+            'Film list',
+            props.fields.hidden.value,
+            props.fields.list.value ? title(props.fields.list.value) : 'choose a list',
+            props.fields.count.value ? `first ${props.fields.count.value}` : 'all films',
+          ),
+        schema: fields.object({
+          heading: sceneHeading('INT. VIDEO SHOP — DAY'),
+          list: fields.relationship({ label: 'List', collection: 'lists' }),
+          count: fields.integer({
+            label: 'How many films',
+            description: 'Shows the first few with a link to the full list. Leave empty to show all.',
+            defaultValue: 8,
+          }),
+          layout: select('Layout', filmLayouts, 'posters'),
+          columns: select('Columns (poster grid)', columns, '4'),
+          ...extras('CUT TO:'),
+        }),
+      },
+      notes: {
+        label: 'Notes on film',
+        itemLabel: (props) =>
+          label(
+            'Notes on film',
+            props.fields.hidden.value,
+            props.fields.heading.value,
+            props.fields.limit.value ? `latest ${props.fields.limit.value}` : 'all notes',
+          ),
+        schema: fields.object({
+          heading: sceneHeading('INT. NOTES ON FILM — NIGHT'),
+          limit: fields.integer({ label: 'How many notes', description: 'Leave empty to show all.' }),
+          ...extras('CUT TO:'),
+        }),
+      },
+      text: {
+        label: 'Text',
+        itemLabel: (props) =>
+          label('Text', props.fields.hidden.value, props.fields.heading.value, props.fields.body.value.slice(0, 40)),
+        schema: fields.object({
+          heading: sceneHeading('INT. ANYWHERE — DAY'),
+          body: fields.text({ label: 'Text', description: 'Leave a blank line between paragraphs.', multiline: true }),
+          ...extras('CUT TO:'),
+        }),
+      },
+      contact: {
+        label: 'Contact',
+        itemLabel: (props) => label('Contact', props.fields.hidden.value, props.fields.heading.value),
+        schema: fields.object({
+          heading: sceneHeading('EXT. CONTACT — DAY'),
+          ...extras('CUT TO:'),
+        }),
+      },
+    },
+    {
+      label: 'Blocks',
+      description:
+        'The page from top to bottom. Drag to reorder, click to edit. Each block has its own transition (CUT TO: etc.) and a Hide switch.',
+    },
+  );
+
+const pageEnding = fields.object(
+    {
+      transition: select('Final transition', endings, 'FADE OUT.'),
+      theEnd: fields.checkbox({ label: 'Show THE END', defaultValue: true }),
+    },
+    { label: 'Ending', description: 'Printed after the last block.' },
+  );
+
 export default config({
   storage: githubRepo ? { kind: 'github', repo: githubRepo } : { kind: 'local' },
   ui: {
     brand: { name: 'Liams Portfolio' },
     navigation: {
-      Pages: ['home'],
+      Pages: ['home', 'pages'],
       Content: ['work', 'reviews', 'lists', 'notes'],
       Settings: ['site'],
     },
@@ -93,161 +261,8 @@ export default config({
       path: 'src/content/home/',
       format: { data: 'yaml' },
       schema: {
-        blocks: fields.blocks(
-          {
-            script: {
-              label: 'Script (screenplay lines)',
-              itemLabel: (props) => {
-                const lines = props.fields.lines.elements.map((l) => l.fields.text.value.trim()).filter(Boolean);
-                const scene = props.fields.lines.elements.find((l) => l.fields.kind.value === 'scene')?.fields.text.value;
-                return label('Script', props.fields.hidden.value, scene || lines[0] || 'empty', props.fields.typewriter.value && 'types out');
-              },
-              schema: fields.object({
-                lines: fields.array(scriptElement, {
-                  label: 'Lines',
-                  itemLabel: (props) =>
-                    `${elementLabels[props.fields.kind.value as keyof typeof elementLabels]}: ${props.fields.text.value.slice(0, 50)}`,
-                }),
-                typewriter: fields.checkbox({
-                  label: 'Type out on load',
-                  description: 'Only the first script on the page types itself out.',
-                  defaultValue: true,
-                }),
-                ...extras(''),
-              }),
-            },
-            watching: {
-              label: 'Recently watched (Letterboxd)',
-              itemLabel: (props) =>
-                label(
-                  'Recently watched',
-                  props.fields.hidden.value,
-                  props.fields.heading.value,
-                  props.fields.username.value ? `@${props.fields.username.value}` : 'no username',
-                  `${props.fields.count.value ?? 4} films`,
-                ),
-              schema: fields.object({
-                heading: sceneHeading('INT. SCREENING ROOM — NIGHT'),
-                username: fields.text({ label: 'Letterboxd username', description: 'Hidden on the live site while empty.' }),
-                count: fields.integer({ label: 'How many films', defaultValue: 4, validation: { min: 1, max: 12 } }),
-                ...extras('CUT TO:'),
-              }),
-            },
-            work: {
-              label: 'Work (projects)',
-              itemLabel: (props) => {
-                const f = props.fields;
-                const chosen = f.items.elements.length;
-                return label(
-                  'Work',
-                  f.hidden.value,
-                  f.heading.value,
-                  chosen ? `${chosen} chosen` : 'all projects',
-                  `${f.columns.value} across, ${aspects.labels[f.aspect.value as keyof typeof aspects.labels].split(' ')[0]!.toLowerCase()}`,
-                );
-              },
-              schema: fields.object({
-                heading: sceneHeading('INT. WORK — DAY'),
-                items: fields.array(fields.relationship({ label: 'Project', collection: 'work' }), {
-                  label: 'Projects',
-                  description: 'Pick and drag into order. Leave empty to show every project, newest first.',
-                  itemLabel: (props) => (props.value ? title(props.value) : 'Choose a project'),
-                }),
-                columns: select('Columns', columns, '1'),
-                aspect: select('Image shape', aspects, 'wide'),
-                width: select('Width', widths, 'script', 'Wide and full width break out of the text column.'),
-                captions: select('Captions', captions, 'full'),
-                preview: select('Video previews', previews, 'hover', 'For projects with a preview loop uploaded.'),
-                ...extras('CUT TO:'),
-              }),
-            },
-            reviews: {
-              label: 'Reviews (latest)',
-              itemLabel: (props) =>
-                label(
-                  'Reviews',
-                  props.fields.hidden.value,
-                  props.fields.heading.value,
-                  `latest ${props.fields.count.value ?? 4}`,
-                  filmLayouts.labels[props.fields.layout.value as keyof typeof filmLayouts.labels].toLowerCase(),
-                ),
-              schema: fields.object({
-                heading: sceneHeading('INT. REVIEWS — NIGHT'),
-                count: fields.integer({ label: 'How many reviews', defaultValue: 4, validation: { min: 1, max: 24 } }),
-                layout: select('Layout', filmLayouts, 'posters'),
-                columns: select('Columns (poster grid)', columns, '4'),
-                ...extras('CUT TO:'),
-              }),
-            },
-            list: {
-              label: 'Film list',
-              itemLabel: (props) =>
-                label(
-                  'Film list',
-                  props.fields.hidden.value,
-                  props.fields.list.value ? title(props.fields.list.value) : 'choose a list',
-                  props.fields.count.value ? `first ${props.fields.count.value}` : 'all films',
-                ),
-              schema: fields.object({
-                heading: sceneHeading('INT. VIDEO SHOP — DAY'),
-                list: fields.relationship({ label: 'List', collection: 'lists' }),
-                count: fields.integer({
-                  label: 'How many films',
-                  description: 'Shows the first few with a link to the full list. Leave empty to show all.',
-                  defaultValue: 8,
-                }),
-                layout: select('Layout', filmLayouts, 'posters'),
-                columns: select('Columns (poster grid)', columns, '4'),
-                ...extras('CUT TO:'),
-              }),
-            },
-            notes: {
-              label: 'Notes on film',
-              itemLabel: (props) =>
-                label(
-                  'Notes on film',
-                  props.fields.hidden.value,
-                  props.fields.heading.value,
-                  props.fields.limit.value ? `latest ${props.fields.limit.value}` : 'all notes',
-                ),
-              schema: fields.object({
-                heading: sceneHeading('INT. NOTES ON FILM — NIGHT'),
-                limit: fields.integer({ label: 'How many notes', description: 'Leave empty to show all.' }),
-                ...extras('CUT TO:'),
-              }),
-            },
-            text: {
-              label: 'Text',
-              itemLabel: (props) =>
-                label('Text', props.fields.hidden.value, props.fields.heading.value, props.fields.body.value.slice(0, 40)),
-              schema: fields.object({
-                heading: sceneHeading('INT. ANYWHERE — DAY'),
-                body: fields.text({ label: 'Text', description: 'Leave a blank line between paragraphs.', multiline: true }),
-                ...extras('CUT TO:'),
-              }),
-            },
-            contact: {
-              label: 'Contact',
-              itemLabel: (props) => label('Contact', props.fields.hidden.value, props.fields.heading.value),
-              schema: fields.object({
-                heading: sceneHeading('EXT. CONTACT — DAY'),
-                ...extras('CUT TO:'),
-              }),
-            },
-          },
-          {
-            label: 'Blocks',
-            description:
-              'The page from top to bottom. Drag to reorder, click to edit. Each block has its own transition (CUT TO: etc.) and a Hide switch.',
-          },
-        ),
-        ending: fields.object(
-          {
-            transition: select('Final transition', endings, 'FADE OUT.'),
-            theEnd: fields.checkbox({ label: 'Show THE END', defaultValue: true }),
-          },
-          { label: 'Ending', description: 'Printed after the last block.' },
-        ),
+        blocks: pageBlocks,
+        ending: pageEnding,
       },
     }),
     site: singleton({
@@ -275,6 +290,58 @@ export default config({
           description: 'Publish /reviews (with search and filters) and a page for each review.',
           defaultValue: true,
         }),
+        sections: fields.object(
+          {
+            notesLabel: fields.text({ label: 'Notes: name', description: 'e.g. Notes on film, Opinion pieces', defaultValue: 'Notes on film' }),
+            notesPath: address('Notes: address', 'notes', 'The page listing them, and each one at /address/piece. e.g. opinion'),
+            notesPage: fields.checkbox({ label: 'Notes: publish a page listing them all', defaultValue: true }),
+            reviewsLabel: fields.text({ label: 'Reviews: name', defaultValue: 'Reviews' }),
+            reviewsPath: address('Reviews: address', 'reviews'),
+            listsPath: address('Film lists: address', 'lists'),
+            workPath: address('Project pages: address', 'work'),
+          },
+          {
+            label: 'Sections',
+            description: 'Names and web addresses. Changing an address changes every link to it; old addresses stop working.',
+          },
+        ),
+        nav: fields.object(
+          {
+            show: fields.checkbox({
+              label: 'Show navigation',
+              description: 'A small bar at the top of every page: your name (links home) and the tabs below.',
+            }),
+            items: fields.array(
+              fields.conditional(
+                fields.select({
+                  label: 'Tab goes to',
+                  options: [
+                    { label: 'Home', value: 'home' },
+                    { label: 'Notes / opinion pieces', value: 'notes' },
+                    { label: 'Reviews', value: 'reviews' },
+                    { label: 'A page', value: 'page' },
+                    { label: 'Another website', value: 'link' },
+                  ],
+                  defaultValue: 'page',
+                }),
+                {
+                  home: fields.object({ label: navLabel('Portfolio') }),
+                  notes: fields.object({ label: navLabel('Opinion') }),
+                  reviews: fields.object({ label: navLabel('Reviews') }),
+                  page: fields.object({ page: fields.relationship({ label: 'Page', collection: 'pages' }), label: navLabel('') }),
+                  link: fields.object({ url: fields.url({ label: 'Address', validation: { isRequired: true } }), label: navLabel('') }),
+                },
+              ),
+              {
+                label: 'Tabs',
+                description: 'In order. Drag to reorder.',
+                itemLabel: (props) =>
+                  `${props.value.fields.label.value || ('page' in props.value.fields ? props.value.fields.page.value : '') || props.discriminant} → ${props.discriminant}`,
+              },
+            ),
+          },
+          { label: 'Navigation' },
+        ),
         theme: fields.object(
           {
             palette: fields.conditional(
@@ -372,6 +439,23 @@ export default config({
     }),
   },
   collections: {
+    pages: collection({
+      label: 'Pages',
+      slugField: 'title',
+      path: 'src/content/pages/*',
+      format: { data: 'yaml' },
+      columns: ['title'],
+      schema: {
+        title: fields.slug({
+          name: { label: 'Title' },
+          slug: { label: 'Address', description: 'The page lives at /address. e.g. about' },
+        }),
+        description: fields.text({ label: 'Search description', multiline: true, validation: { length: { max: 200 } } }),
+        showTitle: fields.checkbox({ label: 'Show the title at the top', defaultValue: true }),
+        blocks: pageBlocks,
+        ending: pageEnding,
+      },
+    }),
     work: collection({
       label: 'Work',
       slugField: 'title',

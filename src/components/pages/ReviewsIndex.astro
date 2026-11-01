@@ -1,17 +1,10 @@
 ---
-// /reviews, only built when the Reviews page is switched on in Site settings
-// and there's at least one review. (A rest route with an undefined param is
-// how Astro builds an optional index page.)
-import type { GetStaticPaths } from 'astro';
+// The reviews page (search, filters, sorting). Only built when the Reviews
+// page is switched on in Site settings and there's at least one review.
 import Base from '../../layouts/Base.astro';
 import Films from '../../components/Films.astro';
 import { getReviews, getSite, stars } from '../../lib/content';
 import { reviewItems } from '../../lib/reviews';
-
-export const getStaticPaths = (async () => {
-  const reviews = await getReviews();
-  return reviews.length ? [{ params: { index: undefined } }] : [];
-}) satisfies GetStaticPaths;
 
 const site = await getSite();
 const reviews = await getReviews();
@@ -24,9 +17,9 @@ const tags = [...new Set(reviews.flatMap((r) => r.data.tags))].sort((a, b) => a.
 const ratingSteps = [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1];
 ---
 
-<Base title="Reviews" description={`Film reviews by ${site.name}. ${reviews.length} films, searchable by title, rating, decade and tag.`} back>
+<Base title={site.sections.reviewsLabel} description={`Film reviews by ${site.name}. ${reviews.length} films, searchable by title, rating, decade and tag.`} back>
   <section class="page sp head">
-    <h1 class="sp-scene">Reviews</h1>
+    <h1 class="sp-scene">{site.sections.reviewsLabel}</h1>
     <p class="muted"><span id="count">{reviews.length}</span> of {reviews.length} films</p>
   </section>
 

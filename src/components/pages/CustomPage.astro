@@ -1,0 +1,38 @@
+---
+// A page made in the CMS (Pages), built from the same blocks as the home page.
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Blocks from '../Blocks.astro';
+
+interface Props {
+  page: CollectionEntry<'pages'>;
+}
+
+const { data } = Astro.props.page;
+---
+
+<Base title={data.title} description={data.description || undefined} back>
+  {
+    data.showTitle && (
+      <header class="page title">
+        <h1>{data.title}</h1>
+      </header>
+    )
+  }
+  <Blocks blocks={data.blocks} ending={data.ending} />
+</Base>
+
+<style>
+  .title {
+    padding-block: 3lh;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    text-decoration-thickness: 1px;
+  }
+</style>

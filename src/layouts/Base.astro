@@ -5,6 +5,7 @@ import { getSite } from '../lib/content';
 import { tmdbEnabled } from '../lib/tmdb';
 import { themeColours, themeCss } from '../lib/themes';
 import Halftone from '../components/Halftone.astro';
+import Nav from '../components/Nav.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -73,10 +74,14 @@ const barColour = themeColours(theme);
     <a class="skip" href="#main">Skip to content</a>
     {theme.dots.discriminant === 'on' && <Halftone {...theme.dots.value} />}
     {
-      back && (
-        <header class="page top">
-          <a href="/">← {site.name}</a>
-        </header>
+      site.nav.show ? (
+        <Nav />
+      ) : (
+        back && (
+          <header class="page top">
+            <a href="/">← {site.name}</a>
+          </header>
+        )
       )
     }
 

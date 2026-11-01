@@ -2,6 +2,8 @@
 import type { CollectionEntry } from 'astro:content';
 import Films from '../Films.astro';
 import { reviewItems } from '../../lib/reviews';
+import { getLinks } from '../../lib/paths';
+import { getSite } from '../../lib/content';
 import type { Columns, FilmLayout } from '../../lib/options';
 
 interface Props {
@@ -12,11 +14,13 @@ interface Props {
 }
 
 const { reviews, count, layout, columns } = Astro.props;
+const links = await getLinks();
+const { sections } = await getSite();
 const items = await reviewItems(reviews.slice(0, count || 4), { withExcerpt: layout === 'list' });
 ---
 
 <Films items={items} layout={layout} columns={columns} />
-<p class="more"><a href="/reviews">All {reviews.length} reviews →</a></p>
+<p class="more"><a href={links.reviews}>All {reviews.length} {sections.reviewsLabel.toLowerCase()} →</a></p>
 
 <style>
   .more {
