@@ -1,0 +1,70 @@
+---
+import type { Element } from '../lib/screenplay';
+
+interface Props {
+  elements: Element[];
+}
+
+const { elements } = Astro.props;
+
+// Group side-by-side (dual) dialogue so it can sit in two columns
+type Group = { dual: false; el: Element } | { dual: true; left: Element[]; right: Element[] };
+const groups: Group[] = [];
+for (const el of elements) {
+  const last = groups.at(-1);
+  if (!el.dual) groups.push({ dual: false, el });
+  else if (last?.dual && !(el.dual === 'left' && last.right.length)) last[el.dual].push(el);
+  else groups.push({ dual: true, left: el.dual === 'left' ? [el] : [], right: el.dual === 'right' ? [el] : [] });
+}
+---
+
+<div class="sp excerpt">
+  {
+    groups.map((g) =>
+      g.dual ? (
+        <div class="dual">
+          {[g.left, g.right].map((col) => (
+            <div class="sp">
+              {col.map((el) => (
+                <p class={`sp-${el.kind}`} set:html={el.html} />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p class={`sp-${g.el.kind}`} data-scene={g.el.scene} set:html={g.el.html} />
+      ),
+    )
+  }
+</div>
+
+<style>
+  /* Keep line breaks from the script within a paragraph */
+  .excerpt :global(p) {
+    white-space: pre-line;
+  }
+
+  .excerpt :global(.sp-shot) {
+    text-transform: uppercase;
+  }
+
+  .dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2ch;
+  }
+
+  .dual :global(.sp-character) {
+    margin-left: 25%;
+  }
+
+  .dual :global(.sp-parenthetical) {
+    margin-left: 12%;
+    max-width: none;
+  }
+
+  .dual :global(.sp-dialogue) {
+    margin-left: 0;
+    max-width: none;
+  }
+</style>

@@ -99,6 +99,8 @@ const work = defineCollection({
       imageAlt: optional,
       loop: z.string().nullish(),
       link: url,
+      excerpt: z.string().optional(),
+      excerptFile: z.string().nullish(),
     }),
 });
 

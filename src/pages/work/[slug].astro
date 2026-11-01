@@ -1,0 +1,125 @@
+---
+// A page for each project that has a script excerpt.
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Excerpt from '../../components/Excerpt.astro';
+import Theatre from '../../components/Theatre.astro';
+import { getSite, getWork } from '../../lib/content';
+import { hasExcerpt, loadExcerpt } from '../../lib/screenplay';
+import { parseVideo } from '../../lib/video';
+
+export const getStaticPaths = (async () => {
+  const work = await getWork();
+  return work.filter((w) => hasExcerpt(w.data)).map((project) => ({ params: { slug: project.id }, props: { project } }));
+}) satisfies GetStaticPaths;
+
+const { project } = Astro.props;
+const { data } = project;
+const site = await getSite();
+const elements = await loadExcerpt(data);
+const video = parseVideo(data.video);
+const thumbnail = data.image ? undefined : video?.thumbnail;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: data.title,
+  description: data.description || undefined,
+  dateCreated: String(data.year),
+  creator: { '@type': 'Person', name: site.name },
+  url: new URL(Astro.url.pathname, Astro.site).href,
+};
+---
+
+<Base title={data.title} description={data.description || `${data.title}, by ${site.name}.`} image={data.image} type="article" jsonLd={jsonLd} back>
+  <article class="page">
+    <header class="sp head">
+      <h1 class="sp-scene">{data.title} ({data.year})</h1>
+      {data.role && <p class="muted">{data.role}</p>}
+      {data.description && <p>{data.description}</p>}
+      {data.link && <p><a href={data.link} rel="noopener" target="_blank">Read the full script →</a></p>}
+    </header>
+
+    {
+      (data.image || thumbnail) && (
+        <div class="frame">
+          {video ? (
+            <button type="button" class="hit" data-video={video.embed} data-title={data.title} aria-label={`Play ${data.title}`}>
+              {data.image ? (
+                <Image src={data.image} alt={data.imageAlt ?? ''} widths={[720, 1080, 1440]} sizes="(min-width: 42rem) 38rem, 100vw" />
+              ) : (
+                <img src={thumbnail} alt={data.imageAlt ?? ''} />
+              )}
+              <span class="play" aria-hidden="true">▶ Play</span>
+            </button>
+          ) : (
+            data.image && <Image src={data.image} alt={data.imageAlt ?? ''} widths={[720, 1080, 1440]} sizes="(min-width: 42rem) 38rem, 100vw" />
+          )}
+        </div>
+      )
+    }
+
+    <section class="script" aria-label="Script excerpt">
+      <p class="label muted">Excerpt</p>
+      <Excerpt elements={elements} />
+    </section>
+  </article>
+
+  {video && <Theatre />}
+</Base>
+
+<style>
+  .head {
+    padding-block: 2lh;
+  }
+
+  .head > * + * {
+    margin-top: 0.5lh;
+  }
+
+  .frame {
+    position: relative;
+    margin-bottom: 3lh;
+    background: var(--line);
+  }
+
+  .frame :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .hit {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .play {
+    position: absolute;
+    left: 1ch;
+    bottom: 0.5lh;
+    padding: 0.15lh 1ch;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.875em;
+    text-transform: uppercase;
+  }
+
+  .script {
+    padding-top: 2lh;
+    border-top: 1px solid var(--line);
+  }
+
+  .label {
+    margin-bottom: 2lh;
+    font-size: 0.8125em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+</style>

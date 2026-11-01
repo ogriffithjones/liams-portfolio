@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { aspectRatio, type Aspect, type Captions, type Columns, type Preview, type Width } from '../../lib/options';
 import { parseVideo } from '../../lib/video';
+import { hasExcerpt } from '../../lib/screenplay';
 
 interface Props {
   work: CollectionEntry<'work'>[];
@@ -28,8 +29,12 @@ const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' :
 
 <div class:list={['grid', width !== 'script' && `bleed bleed-${width}`]} data-cols={columns} data-aspect={aspect} style={`--n: ${cols}; --ratio: ${aspectRatio[aspect]}`}>
   {
-    list.map(({ data }) => {
+    list.map(({ id, data }) => {
       const video = parseVideo(data.video);
+      // Projects with a script excerpt get their own page
+      const page = hasExcerpt(data) ? `/work/${id}` : null;
+      const href = page ?? data.link;
+      const external = page ? {} : { rel: 'noopener', target: '_blank' };
       const alt = data.imageAlt ?? '';
       const media = (
         <>
@@ -59,8 +64,8 @@ const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' :
                 {media}
                 <span class="play" aria-hidden="true">▶ Play</span>
               </button>
-            ) : data.link ? (
-              <a class="hit" href={data.link} rel="noopener" target="_blank" aria-label={data.title}>
+            ) : href ? (
+              <a class="hit" href={href} {...external} aria-label={data.title}>
                 {media}
               </a>
             ) : (
@@ -72,8 +77,8 @@ const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' :
           ) : (
             <div class="caption">
               <h3>
-                {data.link ? (
-                  <a href={data.link} rel="noopener" target="_blank">
+                {href ? (
+                  <a href={href} {...external}>
                     {data.title}
                   </a>
                 ) : (
@@ -83,6 +88,11 @@ const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' :
               </h3>
               {captions === 'full' && data.role && <p class="muted">{data.role}</p>}
               {captions === 'full' && data.description && <p class="desc">{data.description}</p>}
+              {page && (
+                <p class="excerpt-link">
+                  <a href={page}>Read an excerpt →</a>
+                </p>
+              )}
             </div>
           )}
         </article>
@@ -193,7 +203,8 @@ const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' :
     font-size: 0.875em;
   }
 
-  .desc {
+  .desc,
+  .excerpt-link {
     margin-top: 0.5lh;
   }
 </style>

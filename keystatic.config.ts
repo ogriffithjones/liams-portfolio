@@ -303,6 +303,18 @@ export default config({
           publicPath: '/media/work/',
         }),
         link: fields.url({ label: 'Link', description: 'Optional: where the title links to (festival page, credits, etc.)' }),
+        excerpt: fields.text({
+          label: 'Script excerpt',
+          description:
+            'Optional. Paste a scene from WriterDuet (or any screenplay as plain text). Shown on the project’s own page, formatted as a script. For exact formatting, upload an .fdx below instead.',
+          multiline: true,
+        }),
+        excerptFile: fields.file({
+          label: 'Script file (.fdx or .fountain)',
+          description: 'Optional. In WriterDuet: Export → Final Draft (.fdx). Used instead of the pasted excerpt when both are set.',
+          directory: 'src/data/scripts',
+          publicPath: 'src/data/scripts/',
+        }),
       },
     }),
     reviews: collection({
