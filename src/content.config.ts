@@ -101,6 +101,7 @@ const work = defineCollection({
       link: url,
       excerpt: z.string().optional(),
       excerptFile: z.string().nullish(),
+      excerptScenes: z.string().optional(),
     }),
 });
 

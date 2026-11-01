@@ -316,6 +316,11 @@ export default config({
           directory: 'src/data/scripts',
           publicPath: 'src/data/scripts/',
         }),
+        excerptScenes: fields.text({
+          label: 'Scenes to show',
+          description:
+            'Optional. Which scenes to show, counting scene headings from the top, e.g. 1-3, 7. Leave empty to show everything. The site only shows these, but the whole uploaded file is stored in the public GitHub repo, so trim private scripts before uploading.',
+        }),
       },
     }),
     reviews: collection({

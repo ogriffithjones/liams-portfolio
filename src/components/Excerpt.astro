@@ -140,6 +140,14 @@ for (const el of elements) {
     text-transform: uppercase;
   }
 
+  /* Marks scenes left out between chosen ones */
+  .excerpt :global(.sp-gap) {
+    margin-block: 2lh;
+    text-align: center;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+  }
+
   .dual {
     display: grid;
     grid-template-columns: 1fr 1fr;
