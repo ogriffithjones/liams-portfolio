@@ -44,16 +44,16 @@ blocks:
       preview: autoplay
       cut: 'CUT TO:'
       hidden: false
-  - discriminant: watching
-    value:
-      heading: INT. SCREENING ROOM — NIGHT
-      username: '25660'
-      count: 4
-      cut: 'CUT TO:'
-      hidden: false
   - discriminant: text
     value:
-      body: My Letterboxd. The last 4 films I watched and my rating for them.
+      heading: INT. SCREENING ROOM — NIGHT
+      body: What I've been watching...
+      cut: 'FADE TO:'
+      hidden: false
+  - discriminant: watching
+    value:
+      username: '25660'
+      count: 4
       cut: ''
       hidden: false
   - discriminant: contact
