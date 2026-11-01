@@ -9,7 +9,7 @@
 import { readFile } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 
-export type Kind = 'scene' | 'action' | 'character' | 'parenthetical' | 'dialogue' | 'transition' | 'centered' | 'shot' | 'gap';
+export type Kind = 'scene' | 'action' | 'character' | 'parenthetical' | 'dialogue' | 'transition' | 'centered' | 'shot' | 'gap' | 'continued-top' | 'continued-bottom';
 
 export interface Element {
   kind: Kind;
@@ -218,7 +218,14 @@ const plain = (html: string) => html.replace(/<[^>]+>/g, '').replace(/&amp;/g, '
  * (KITCHEN). Anything before the first heading (FADE IN:, etc.) goes with
  * scene 1. Scenes keep their number from the full script.
  */
-export function selectScenes(elements: Element[], spec: string, { gaps = true } = {}): Element[] {
+export interface Selection {
+  elements: Element[];
+  /** The selection leaves out the start / end of the script */
+  cutStart: boolean;
+  cutEnd: boolean;
+}
+
+export function selectScenes(elements: Element[], spec: string, { gaps = true } = {}): Selection {
   const scenes: Element[][] = [[]];
   for (const el of elements) {
     if (el.kind === 'scene') scenes.push([]);
@@ -244,7 +251,7 @@ export function selectScenes(elements: Element[], spec: string, { gaps = true } 
 
   if (!order.length) {
     console.warn(`[excerpt] Scenes "${spec}" matched nothing; showing the whole script`);
-    return elements;
+    return { elements, cutStart: false, cutEnd: false };
   }
 
   const out: Element[] = [];
@@ -253,13 +260,19 @@ export function selectScenes(elements: Element[], spec: string, { gaps = true } 
     if (n === 1) out.push(...scenes[0]!);
     for (const el of scenes[n]!) out.push(el.kind === 'scene' && !el.scene ? { ...el, scene: String(n) } : el);
   });
-  return out;
+  return { elements: out, cutStart: Math.min(...order) > 1, cutEnd: Math.max(...order) < count };
 }
 
 // ---------------------------------------------------------------- loading
 
 type Show = { discriminant: 'all' | 'off'; value?: unknown } | { discriminant: 'chosen'; value: { scenes: string; gaps: boolean } };
-type Source = { excerpt?: string | undefined; excerptFile?: string | null | undefined; excerptShow?: Show | undefined };
+type Marks = 'auto' | 'both' | 'start' | 'end' | 'none';
+type Source = {
+  excerpt?: string | undefined;
+  excerptFile?: string | null | undefined;
+  excerptShow?: Show | undefined;
+  excerptMarks?: Marks | undefined;
+};
 
 /** Script files we can read; anything else (PDF, Word…) is ignored, not mangled. */
 const readable = (file: string | null | undefined) =>
@@ -275,9 +288,21 @@ export async function loadExcerpt(data: Source) {
     if (data.excerpt?.trim()) elements = parseFountain(data.excerpt);
   }
   const show = data.excerptShow;
-  return show?.discriminant === 'chosen' && show.value.scenes.trim()
-    ? selectScenes(elements, show.value.scenes, { gaps: show.value.gaps })
-    : elements;
+  const chosen =
+    show?.discriminant === 'chosen' && show.value.scenes.trim()
+      ? selectScenes(elements, show.value.scenes, { gaps: show.value.gaps })
+      : { elements, cutStart: false, cutEnd: false };
+
+  // CONTINUED markers, as on a script page that carries on from / to another
+  const marks = data.excerptMarks ?? 'auto';
+  const top = marks === 'both' || marks === 'start' || (marks === 'auto' && chosen.cutStart);
+  const bottom = marks === 'both' || marks === 'end' || (marks === 'auto' && chosen.cutEnd);
+  if (!chosen.elements.length) return [];
+  return [
+    ...(top ? [{ kind: 'continued-top' as const, html: 'CONTINUED:' }] : []),
+    ...chosen.elements,
+    ...(bottom ? [{ kind: 'continued-bottom' as const, html: '(CONTINUED)' }] : []),
+  ];
 }
 
 /** Whether a project has a script to show (and it isn't switched off). */

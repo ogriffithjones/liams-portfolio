@@ -137,6 +137,17 @@ for (const el of elements) {
     text-transform: uppercase;
   }
 
+  /* Part of a longer script: CONTINUED: at the top, (CONTINUED) at the bottom */
+  .excerpt :global(.sp-continued-top),
+  .excerpt :global(.sp-continued-bottom) {
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .excerpt :global(.sp-continued-bottom) {
+    text-align: right;
+  }
+
   /* Marks scenes left out between chosen ones */
   .excerpt :global(.sp-gap) {
     margin-block: 2lh;

@@ -453,6 +453,19 @@ export default config({
             }),
           },
         ),
+        excerptMarks: fields.select({
+          label: 'Continued markers',
+          description:
+            'CONTINUED: at the top and (CONTINUED) at the bottom, so readers know the excerpt is part of a longer script. Automatic adds them when chosen scenes leave out the start or end.',
+          options: [
+            { label: 'Automatic', value: 'auto' },
+            { label: 'Start and end', value: 'both' },
+            { label: 'Start only', value: 'start' },
+            { label: 'End only', value: 'end' },
+            { label: 'None', value: 'none' },
+          ],
+          defaultValue: 'auto',
+        }),
       },
     }),
     reviews: collection({
