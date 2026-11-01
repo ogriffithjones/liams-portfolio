@@ -27,12 +27,12 @@ blocks:
     value:
       username: '25660'
       count: 4
-      cut: 'CUT TO:'
+      cut: ''
       hidden: false
   - discriminant: contact
     value:
       heading: EXT. CONTACT — DAY
-      cut: ''
+      cut: 'CUT TO:'
       hidden: false
 ending:
   transition: ''
