@@ -6,8 +6,6 @@ blocks:
           text: 'FADE IN:'
         - kind: scene
           text: INT. WEBSITE — DAY
-        - kind: parenthetical
-          text: beat
         - kind: character
           text: WHO AM I?
         - kind: dialogue
