@@ -35,5 +35,5 @@ blocks:
       cut: ''
       hidden: false
 ending:
-  transition: FADE OUT.
+  transition: ''
   theEnd: true
