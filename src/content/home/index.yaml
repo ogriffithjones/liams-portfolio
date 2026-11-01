@@ -39,7 +39,7 @@ blocks:
         - echo
       columns: '1'
       aspect: scope
-      width: script
+      width: full
       captions: full
       preview: hover
       cut: 'CUT TO:'
