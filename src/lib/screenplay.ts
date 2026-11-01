@@ -267,11 +267,13 @@ export function selectScenes(elements: Element[], spec: string, { gaps = true } 
 
 type Show = { discriminant: 'all' | 'off'; value?: unknown } | { discriminant: 'chosen'; value: { scenes: string; gaps: boolean } };
 type Marks = 'auto' | 'both' | 'start' | 'end' | 'none';
+type Label = { discriminant: 'auto' | 'excerpt' | 'script' | 'none'; value?: unknown } | { discriminant: 'custom'; value: { text: string } };
 type Source = {
   excerpt?: string | undefined;
   excerptFile?: string | null | undefined;
   excerptShow?: Show | undefined;
   excerptMarks?: Marks | undefined;
+  excerptLabel?: Label | undefined;
 };
 
 /** Script files we can read; anything else (PDF, Word…) is ignored, not mangled. */
@@ -308,3 +310,17 @@ export async function loadExcerpt(data: Source) {
 /** Whether a project has a script to show (and it isn't switched off). */
 export const hasExcerpt = (data: Source) =>
   data.excerptShow?.discriminant !== 'off' && (readable(data.excerptFile) || Boolean(data.excerpt?.trim()));
+
+/**
+ * What to call the script on the page and in "Read…" links. Automatic says
+ * Excerpt when CONTINUED markers show (part of a longer script), otherwise Script.
+ */
+export function scriptLabel(label: Label | undefined, elements: Element[]) {
+  const partial = elements.some((e) => e.kind === 'continued-top' || e.kind === 'continued-bottom');
+  const kind = !label || label.discriminant === 'auto' ? (partial ? 'excerpt' : 'script') : label.discriminant;
+  const custom = label?.discriminant === 'custom' ? label.value.text.trim() : '';
+  return {
+    heading: kind === 'excerpt' ? 'Excerpt' : kind === 'custom' ? custom || 'Script' : kind === 'none' ? null : 'Script',
+    link: kind === 'excerpt' ? 'Read an excerpt' : kind === 'custom' && custom ? `Read “${custom}”` : 'Read the script',
+  };
+}

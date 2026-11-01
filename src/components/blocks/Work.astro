@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { aspectRatio, type Aspect, type Captions, type Columns, type Preview, type Width } from '../../lib/options';
 import { parseVideo } from '../../lib/video';
-import { hasExcerpt } from '../../lib/screenplay';
+import { hasExcerpt, loadExcerpt, scriptLabel } from '../../lib/screenplay';
 
 interface Props {
   work: CollectionEntry<'work'>[];
@@ -21,6 +21,15 @@ const chosen = items.filter((slug): slug is string => !!slug);
 const list = chosen.length
   ? chosen.map((slug) => work.find((w) => w.id === slug)).filter((w) => w !== undefined)
   : work;
+
+// "Read an excerpt" / "Read the script" for projects with a script page
+const readLinks = new Map(
+  await Promise.all(
+    list
+      .filter((w) => hasExcerpt(w.data))
+      .map(async (w) => [w.id, scriptLabel(w.data.excerptLabel, await loadExcerpt(w.data)).link] as const),
+  ),
+);
 
 const cols = Number(columns);
 const base = { script: '38rem', wide: '76rem', full: '100vw' }[width];
@@ -90,7 +99,7 @@ const sizes = `(min-width: 48rem) calc(${base} / ${cols}), ${cols > 2 ? '50vw' :
               {captions === 'full' && data.description && <p class="desc">{data.description}</p>}
               {page && (
                 <p class="excerpt-link">
-                  <a href={page}>Read an excerpt →</a>
+                  <a href={page}>{readLinks.get(id) ?? 'Read the script'} →</a>
                 </p>
               )}
             </div>

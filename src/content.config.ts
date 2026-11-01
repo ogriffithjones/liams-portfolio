@@ -143,6 +143,12 @@ const work = defineCollection({
       excerptFile: z.string().nullish(),
       fullScript: z.enum(['request', 'link', 'none']).default('request'),
       excerptMarks: z.enum(['auto', 'both', 'start', 'end', 'none']).default('auto'),
+      excerptLabel: z
+        .discriminatedUnion('discriminant', [
+          z.object({ discriminant: z.enum(['auto', 'excerpt', 'script', 'none']), value: z.unknown().optional() }),
+          z.object({ discriminant: z.literal('custom'), value: z.object({ text: z.string().default('') }) }),
+        ])
+        .default({ discriminant: 'auto' }),
       excerptShow: z
         .discriminatedUnion('discriminant', [
           z.object({ discriminant: z.literal('all'), value: z.unknown().optional() }),

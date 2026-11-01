@@ -11,7 +11,7 @@ interface Props {
 
 const { elements, owner, title, year } = Astro.props;
 const url = new URL(Astro.url.pathname, Astro.site).href;
-const notice = `Excerpt from "${title}" by ${owner}, © ${year}. All rights reserved. Not to be copied, reproduced or used for AI training. Read it at ${url}`;
+const notice = `From "${title}" by ${owner}, © ${year}. All rights reserved. Not to be copied, reproduced or used for AI training. Read it at ${url}`;
 
 // Faint repeating "© Name" watermark, so screenshots carry the credit. Used as
 // a mask filled with the text colour, so it follows the site's theme.

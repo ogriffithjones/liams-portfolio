@@ -6,7 +6,7 @@ import Base from '../../layouts/Base.astro';
 import Excerpt from '../../components/Excerpt.astro';
 import Theatre from '../../components/Theatre.astro';
 import { getSite, getWork } from '../../lib/content';
-import { hasExcerpt, loadExcerpt } from '../../lib/screenplay';
+import { hasExcerpt, loadExcerpt, scriptLabel } from '../../lib/screenplay';
 import { parseVideo } from '../../lib/video';
 
 export const getStaticPaths = (async () => {
@@ -18,6 +18,7 @@ const { project } = Astro.props;
 const { data } = project;
 const site = await getSite();
 const elements = await loadExcerpt(data);
+const label = scriptLabel(data.excerptLabel, elements);
 const video = parseVideo(data.video);
 const thumbnail = data.image ? undefined : video?.thumbnail;
 
@@ -80,8 +81,8 @@ const jsonLd = {
       )
     }
 
-    <section class="script" aria-label="Script excerpt">
-      <p class="label muted">Excerpt</p>
+    <section class="script" aria-label={label.heading ?? 'Script'}>
+      {label.heading && <p class="label muted">{label.heading}</p>}
       <Excerpt elements={elements} owner={site.name} title={data.title} year={data.year} />
     </section>
   </article>

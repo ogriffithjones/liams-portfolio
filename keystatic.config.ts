@@ -466,6 +466,29 @@ export default config({
           ],
           defaultValue: 'auto',
         }),
+        excerptLabel: fields.conditional(
+          fields.select({
+            label: 'Script label',
+            description: 'Shown above the script on the project page, and used in the "Read…" link. Automatic says Excerpt when CONTINUED markers show, otherwise Script.',
+            options: [
+              { label: 'Automatic', value: 'auto' },
+              { label: 'Excerpt', value: 'excerpt' },
+              { label: 'Full script', value: 'script' },
+              { label: 'Custom', value: 'custom' },
+              { label: 'None', value: 'none' },
+            ],
+            defaultValue: 'auto',
+          }),
+          {
+            auto: fields.empty(),
+            excerpt: fields.empty(),
+            script: fields.empty(),
+            none: fields.empty(),
+            custom: fields.object({
+              text: fields.text({ label: 'Label', description: 'e.g. Cold open, Pilot — Act One', validation: { isRequired: true } }),
+            }),
+          },
+        ),
       },
     }),
     reviews: collection({
