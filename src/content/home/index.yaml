@@ -26,7 +26,7 @@ blocks:
         - a-study-of-life-and-death
         - project-title-two
       columns: '4'
-      aspect: poster
+      aspect: wide
       width: wide
       captions: full
       preview: hover
