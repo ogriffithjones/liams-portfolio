@@ -1,0 +1,10 @@
+title: A Study of Life and Death
+year: 2024
+description: >-
+  The physical forms of Life and Death meet to decide the fate of a dying
+  teenager. 
+excerptFile: src/data/scripts/a-study-of-life-and-death/excerptFile.fountain
+fullScript: request
+excerptShow:
+  discriminant: all
+excerptMarks: auto
