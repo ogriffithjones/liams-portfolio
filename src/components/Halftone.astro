@@ -33,8 +33,12 @@ const { size, height, animate } = Astro.props;
     const ease = (t: number) => 1 - (1 - Math.min(Math.max(t, 0), 1)) ** 3;
 
     function resize() {
+      // Only when the width changes: on phones the height changes as the
+      // address bar slides away, which shouldn't make the band jump
+      const newWidth = document.documentElement.clientWidth;
+      if (newWidth === width) return;
       const dpr = Math.min(devicePixelRatio || 1, 2);
-      width = innerWidth;
+      width = newWidth;
       height = Math.round(innerHeight * band);
       canvas!.width = width * dpr;
       canvas!.height = height * dpr;
@@ -49,15 +53,17 @@ const { size, height, animate } = Astro.props;
     const padX = spacing * 6;
     const padY = spacing * 3;
 
-    /** The text itself, not its (often full-width) box */
+    /** The text itself, not its (often full-width) box, in page coordinates */
     const textBox = (el: Element) => {
       const range = document.createRange();
       range.selectNodeContents(el);
-      return range.getBoundingClientRect();
+      const r = range.getBoundingClientRect();
+      return { width: r.width, left: r.left + scrollX, right: r.right + scrollX, top: r.top + scrollY, bottom: r.bottom + scrollY };
     };
+    type Box = ReturnType<typeof textBox>;
 
     /** 0 right next to text, easing to 1 in a soft oval around it */
-    function nearText(x: number, y: number, boxes: DOMRect[]) {
+    function nearText(x: number, y: number, boxes: Box[]) {
       let near = 1;
       for (const b of boxes) {
         const dx = Math.max(b.left - x, 0, x - b.right) / padX;
@@ -120,8 +126,10 @@ const { size, height, animate } = Astro.props;
 </script>
 
 <style>
+  /* Part of the page (not pinned to the window), so the dots and the
+     clearing around text scroll and bounce exactly with the text */
   .halftone {
-    position: fixed;
+    position: absolute;
     inset: 0 0 auto 0;
     z-index: -1;
     width: 100%;
