@@ -30,7 +30,7 @@ blocks:
       hidden: false
   - discriminant: list
     value:
-      heading: INT. VIDEO SHOP — DAY
+      heading: INT. Opinions — DAY
       list: list-title-one
       count: 4
       layout: posters
