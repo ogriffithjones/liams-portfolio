@@ -35,7 +35,7 @@ blocks:
       list: list-title-one
       count: 8
       layout: posters
-      columns: '3'
+      columns: '4'
       cut: ''
       hidden: false
   - discriminant: work
