@@ -43,29 +43,61 @@ const { size, height, animate } = Astro.props;
       draw();
     }
 
+    // Text the dots clear away from, so titles stay easy to read
+    // Any text that can sit in the band: headings, paragraphs, links, form fields
+    const clearOf = 'h1, h2, h3, p, li, dt, dd, header a, label, input, select';
+    const padX = spacing * 6;
+    const padY = spacing * 3;
+
+    /** The text itself, not its (often full-width) box */
+    const textBox = (el: Element) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return range.getBoundingClientRect();
+    };
+
+    /** 0 right next to a title, easing to 1 in a soft oval around it */
+    function clearance(x: number, y: number, boxes: DOMRect[]) {
+      let near = 1;
+      for (const b of boxes) {
+        const dx = Math.max(b.left - x, 0, x - b.right) / padX;
+        const dy = Math.max(b.top - y, 0, y - b.bottom) / padY;
+        near = Math.min(near, Math.hypot(dx, dy));
+      }
+      return near >= 1 ? 1 : near * near * (3 - 2 * near);
+    }
+
     function draw(now = performance.now()) {
       frame = 0;
       const printed = animate ? (now - start) / printFor : 1;
       const scrolled = Math.min(scrollY / (height * 1.5), 1);
-      const maxR = spacing * 0.5;
+      const boxes = [...document.querySelectorAll(clearOf)]
+        .map(textBox)
+        .filter((b) => b.width && b.bottom > -padY && b.top < height + padY);
       ctx!.clearRect(0, 0, width, height);
       ctx!.fillStyle = getComputedStyle(canvas!).color;
 
-      for (let row = 0, y = spacing / 2; y < height; row++, y += spacing) {
+      let row = 0;
+      for (let y = spacing / 2; y < height; row++) {
         const depth = y / height; // 0 at the top, 1 at the bottom of the band
-        const base = maxR * (1 - depth) ** 1.6;
+        // Further down: dots spread apart, shrink and lighten
+        const step = spacing * (1 + depth * 1.6);
+        const base = step * 0.5 * (1 - depth) ** 1.4;
+        ctx!.globalAlpha = 1 - depth * 0.6;
         // Print in top-down: each row starts a little after the one above
         const rowIn = ease((printed * 1.25 - depth) / 0.25);
-        for (let x = row % 2 ? spacing / 2 : 0; x < width + spacing; x += spacing) {
+        for (let x = row % 2 ? step / 2 : 0; x < width + step; x += step) {
           // Scrolling dissolves dots at slightly different rates
           const fade = 1 - ease(scrolled * (1.15 + noise(x, y) * 0.9) - noise(y, x) * 0.15);
-          const r = base * rowIn * fade;
+          const r = base * rowIn * fade * clearance(x, y, boxes);
           if (r < 0.35) continue;
           ctx!.beginPath();
           ctx!.arc(x, y, r, 0, Math.PI * 2);
           ctx!.fill();
         }
+        y += step;
       }
+      ctx!.globalAlpha = 1;
       if (animate && printed < 1) frame = requestAnimationFrame(draw);
     }
 
