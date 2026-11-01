@@ -1,20 +1,8 @@
 :root {
-  --paper: #f7f5f0;
-  --ink: #1a1a1a;
-  --muted: #8a867d;
-  --line: #e2ded5;
+  /* Colours (--paper, --ink, --muted, --line, --accent) come from the theme
+     in Site settings; see src/lib/themes.ts. */
   --gutter: 1.25rem;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #121211;
-    --ink: #e9e6df;
-    --muted: #807c73;
-    --line: #2a2926;
-  }
 }
 
 *,
@@ -37,6 +25,10 @@ body {
   line-height: 1.35;
   /* Wide blocks break out of the column; never cause sideways scroll */
   overflow-x: clip;
+  /* Smooth change when the lights switch flips the theme */
+  transition:
+    background-color 0.4s var(--ease),
+    color 0.4s var(--ease);
 }
 
 img {
@@ -49,6 +41,7 @@ a {
   color: inherit;
   text-underline-offset: 0.2em;
   text-decoration-thickness: 1px;
+  text-decoration-color: var(--accent, currentColor);
   transition: color 0.2s var(--ease);
 }
 
@@ -191,7 +184,7 @@ p {
     position: absolute;
     top: 0;
     font-weight: 400;
-    color: var(--muted);
+    color: var(--accent, var(--muted));
   }
 
   .sp-scene[data-scene]::before {

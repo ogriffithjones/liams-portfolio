@@ -1,5 +1,6 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 import { aspects, captions, columns, endings, filmLayouts, previews, ratings, transitions, widths } from './src/lib/options';
+import { accents, dotColours, dotHeights, dotSizes, hexPattern, modes, palettes } from './src/lib/themes';
 
 // Locally, edits are written straight to the files in this repo.
 // In production, set PUBLIC_KEYSTATIC_GITHUB_REPO (e.g. "owner/liams-portfolio")
@@ -33,6 +34,16 @@ const extras = (cut: string) => ({
   cut: select('Transition before', transitions, cut, 'Printed right-aligned above the block, like a script.'),
   hidden: fields.checkbox({ label: 'Hide', description: 'Keep the block but leave it off the page.' }),
 });
+
+const noFields = <K extends string>(keys: K[]) =>
+  Object.fromEntries(keys.map((k) => [k, fields.empty()])) as Record<K, ReturnType<typeof fields.empty>>;
+
+const hex = (label: string, description: string) =>
+  fields.text({
+    label,
+    description,
+    validation: { isRequired: true, pattern: { regex: hexPattern, message: 'Use a hex colour like #1a1a1a' } },
+  });
 
 const elementLabels = {
   scene: 'Scene heading',
@@ -264,6 +275,93 @@ export default config({
           description: 'Publish /reviews (with search and filters) and a page for each review.',
           defaultValue: true,
         }),
+        theme: fields.object(
+          {
+            palette: fields.conditional(
+              fields.select({
+                label: 'Palette',
+                description: 'Revision colours are the page colours film productions use for each round of script changes.',
+                options: [
+                  ...Object.entries(palettes).map(([value, p]) => ({ value, label: p.label })),
+                  { value: 'custom', label: 'Custom colours' },
+                ],
+                defaultValue: 'script',
+              }),
+              {
+                ...noFields(Object.keys(palettes) as (keyof typeof palettes)[]),
+                custom: fields.object({
+                  background: hex('Background colour', 'e.g. #f7f5f0'),
+                  text: hex('Text colour', 'e.g. #1a1a1a'),
+                }),
+              },
+            ),
+            mode: fields.select({
+              label: 'Light or dark',
+              options: Object.entries(modes).map(([value, label]) => ({ value, label })),
+              defaultValue: 'auto',
+            }),
+            accent: fields.conditional(
+              fields.select({
+                label: 'Accent colour',
+                description: 'Used for scene numbers, link underlines, the typing cursor and selected text.',
+                options: [
+                  ...Object.entries(accents).map(([value, a]) => ({ value, label: a.label })),
+                  { value: 'custom', label: 'Custom colour' },
+                ],
+                defaultValue: 'ink',
+              }),
+              {
+                ...noFields(Object.keys(accents) as (keyof typeof accents)[]),
+                custom: fields.object({ colour: hex('Accent colour', 'e.g. #c0392b') }),
+              },
+            ),
+            lightsSwitch: fields.checkbox({
+              label: 'LIGHTS OFF / LIGHTS ON switch',
+              description: 'Adds a switch in the footer so visitors can flip between light and dark themselves.',
+            }),
+            dots: fields.conditional(
+              fields.checkbox({
+                label: 'Halftone dots',
+                description: 'Printed dots across the top of every page, fading down the page and dissolving as you scroll.',
+              }),
+              {
+                false: fields.empty(),
+                true: fields.object({
+                  colour: fields.conditional(
+                    fields.select({
+                      label: 'Dot colour',
+                      options: [
+                        ...Object.entries(dotColours).map(([value, d]) => ({ value, label: d.label })),
+                        { value: 'custom', label: 'Custom colour' },
+                      ],
+                      defaultValue: 'sage',
+                    }),
+                    {
+                      ...noFields(Object.keys(dotColours) as (keyof typeof dotColours)[]),
+                      custom: fields.object({ colour: hex('Dot colour', 'e.g. #586a57') }),
+                    },
+                  ),
+                  size: fields.select({
+                    label: 'Dot size',
+                    options: Object.entries(dotSizes).map(([value, label]) => ({ value, label })),
+                    defaultValue: 'medium',
+                  }),
+                  height: fields.select({
+                    label: 'How far down the page',
+                    options: Object.entries(dotHeights).map(([value, label]) => ({ value, label })),
+                    defaultValue: 'medium',
+                  }),
+                  animate: fields.checkbox({
+                    label: 'Animate',
+                    description: 'Print in on load and dissolve on scroll. Visitors who prefer reduced motion see still dots.',
+                    defaultValue: true,
+                  }),
+                }),
+              },
+            ),
+          },
+          { label: 'Theme', description: 'Colours for the whole site. Leave as is for the original look.' },
+        ),
         seoDescription: fields.text({
           label: 'Search description',
           description: 'Shown by Google under your name. Aim for 120–160 characters.',

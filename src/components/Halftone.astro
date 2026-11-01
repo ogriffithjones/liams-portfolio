@@ -1,0 +1,100 @@
+---
+// Halftone dots across the top of the page (Site settings → Theme → Dots).
+// Drawn on a canvas: big dots at the top shrinking to nothing further down.
+// They print in row by row on load and dissolve unevenly as you scroll.
+import { dotBand, dotSpacing, type DotsSetting } from '../lib/themes';
+
+type Props = Extract<DotsSetting, { discriminant: 'on' }>['value'];
+
+const { size, height, animate } = Astro.props;
+---
+
+<canvas class="halftone" aria-hidden="true" data-spacing={dotSpacing[size]} data-band={dotBand[height]} data-animate={animate ? '1' : ''}
+></canvas>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas.halftone');
+  const ctx = canvas?.getContext('2d');
+  if (canvas && ctx) {
+    const spacing = Number(canvas.dataset.spacing);
+    const band = Number(canvas.dataset.band);
+    const animate = canvas.dataset.animate === '1' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const start = performance.now();
+    const printFor = 1600;
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+
+    // Stable per-dot randomness, so dots dissolve unevenly but the same each time
+    const noise = (x: number, y: number) => {
+      const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+      return n - Math.floor(n);
+    };
+    const ease = (t: number) => 1 - (1 - Math.min(Math.max(t, 0), 1)) ** 3;
+
+    function resize() {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      width = innerWidth;
+      height = Math.round(innerHeight * band);
+      canvas!.width = width * dpr;
+      canvas!.height = height * dpr;
+      canvas!.style.height = `${height}px`;
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function draw(now = performance.now()) {
+      frame = 0;
+      const printed = animate ? (now - start) / printFor : 1;
+      const scrolled = Math.min(scrollY / (height * 1.5), 1);
+      const maxR = spacing * 0.5;
+      ctx!.clearRect(0, 0, width, height);
+      ctx!.fillStyle = getComputedStyle(canvas!).color;
+
+      for (let row = 0, y = spacing / 2; y < height; row++, y += spacing) {
+        const depth = y / height; // 0 at the top, 1 at the bottom of the band
+        const base = maxR * (1 - depth) ** 1.6;
+        // Print in top-down: each row starts a little after the one above
+        const rowIn = ease((printed * 1.25 - depth) / 0.25);
+        for (let x = row % 2 ? spacing / 2 : 0; x < width + spacing; x += spacing) {
+          // Scrolling dissolves dots at slightly different rates
+          const fade = 1 - ease(scrolled * (1.15 + noise(x, y) * 0.9) - noise(y, x) * 0.15);
+          const r = base * rowIn * fade;
+          if (r < 0.35) continue;
+          ctx!.beginPath();
+          ctx!.arc(x, y, r, 0, Math.PI * 2);
+          ctx!.fill();
+        }
+      }
+      if (animate && printed < 1) frame = requestAnimationFrame(draw);
+    }
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(draw);
+    };
+
+    resize();
+    addEventListener('resize', resize, { passive: true });
+    addEventListener('scroll', schedule, { passive: true });
+    // Recolour when light/dark changes (device setting or the lights switch)
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', schedule);
+    new MutationObserver(schedule).observe(document.documentElement, { attributes: true, attributeFilter: ['data-mode'] });
+  }
+</script>
+
+<style>
+  .halftone {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: -1;
+    width: 100%;
+    color: var(--dots, var(--ink));
+    pointer-events: none;
+  }
+
+  @media print {
+    .halftone {
+      display: none;
+    }
+  }
+</style>

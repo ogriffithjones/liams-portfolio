@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { aspects, captions, columns, endings, filmLayouts, previews, ratings, transitions, widths } from './lib/options';
+import { accents, defaultTheme, dotColours, dotHeights, dotSizes, modes, palettes } from './lib/themes';
 
 // These schemas mirror keystatic.config.ts. Keystatic edits the files,
 // Astro reads them at build time and optimises the images.
@@ -82,6 +83,45 @@ const site = defineCollection({
     location: optional,
     links: z.array(z.object({ label: z.string(), url: z.url() })).default([]),
     reviewsPage: z.boolean().default(true),
+    theme: z
+      .object({
+        palette: z
+          .object({
+            discriminant: z.enum([...(Object.keys(palettes) as [keyof typeof palettes]), 'custom']),
+            value: z.object({ background: z.string().optional(), text: z.string().optional() }).nullish(),
+          })
+          .default(defaultTheme.palette),
+        accent: z
+          .object({
+            discriminant: z.enum([...(Object.keys(accents) as [keyof typeof accents]), 'custom']),
+            value: z.object({ colour: z.string().optional() }).nullish(),
+          })
+          .default(defaultTheme.accent),
+        mode: z.enum(Object.keys(modes) as [keyof typeof modes]).default('auto'),
+        lightsSwitch: z.boolean().default(false),
+        // Keystatic stores the checkbox as true/false; the site reads it as on/off
+        dots: z
+          .discriminatedUnion('discriminant', [
+            z.object({ discriminant: z.literal(false), value: z.unknown().optional() }),
+            z.object({
+              discriminant: z.literal(true),
+              value: z.object({
+                colour: z
+                  .object({
+                    discriminant: z.enum([...(Object.keys(dotColours) as [keyof typeof dotColours]), 'custom']),
+                    value: z.object({ colour: z.string().optional() }).nullish(),
+                  })
+                  .default({ discriminant: 'sage' }),
+                size: z.enum(Object.keys(dotSizes) as [keyof typeof dotSizes]).default('medium'),
+                height: z.enum(Object.keys(dotHeights) as [keyof typeof dotHeights]).default('medium'),
+                animate: z.boolean().default(true),
+              }),
+            }),
+          ])
+          .default({ discriminant: false })
+          .transform((d) => (d.discriminant ? { discriminant: 'on' as const, value: d.value } : { discriminant: 'off' as const })),
+      })
+      .prefault({}),
     seoDescription: optional,
   }),
 });
