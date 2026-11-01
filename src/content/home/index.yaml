@@ -27,7 +27,7 @@ blocks:
     value:
       username: '25660'
       count: 4
-      cut: ''
+      cut: 'CUT TO:'
       hidden: false
   - discriminant: contact
     value:
