@@ -9,6 +9,22 @@ links:
     url: https://instagram.com/
   - label: Vimeo
     url: https://vimeo.com/
+reviewsPage: true
+theme:
+  palette:
+    discriminant: script
+  mode: auto
+  accent:
+    discriminant: ink
+  lightsSwitch: true
+  dots:
+    discriminant: true
+    value:
+      colour:
+        discriminant: sage
+      size: medium
+      height: medium
+      animate: true
 seoDescription: >-
   Search description placeholder. One or two sentences about Liam Dunstan and
   his work, 120 to 160 characters.
