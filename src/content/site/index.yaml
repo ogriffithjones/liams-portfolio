@@ -22,7 +22,7 @@ theme:
     value:
       colour:
         discriminant: sage
-      size: medium
+      size: fine
       height: medium
       animate: true
 seoDescription: >-
