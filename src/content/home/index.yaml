@@ -19,6 +19,26 @@ blocks:
       hidden: false
   - discriminant: work
     value:
+      heading: INT. Main Project— DAY
+      items:
+        - jekyll-and-hyde
+      columns: '1'
+      aspect: wide
+      width: script
+      captions: full
+      preview: hover
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: list
+    value:
+      heading: INT. VIDEO SHOP — DAY
+      count: 6
+      layout: posters
+      columns: '3'
+      cut: ''
+      hidden: false
+  - discriminant: work
+    value:
       heading: INT. Writing— DAY
       items:
         - the-muppet-show
