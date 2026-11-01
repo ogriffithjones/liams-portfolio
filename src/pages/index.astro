@@ -26,6 +26,9 @@ const { blocks, ending } = await getHome({
   lists: new Set(lists.map((l) => l.id)),
   dev: import.meta.env.DEV,
 });
+// Blocks that break out of the text column (only Work, for now)
+const wideBlock = (block: (typeof blocks)[number]['block']) =>
+  block.discriminant === 'work' && block.value.width !== 'script' ? block.value.width : null;
 const hasVideo = blocks.some(({ block }) => block.discriminant === 'work') && work.some((w) => w.data.video || w.data.loop);
 
 const jsonLd = {
@@ -77,7 +80,7 @@ const jsonLd = {
               );
             case 'work':
               return (
-                <Scene heading={block.value.heading} scene={scene} id={id}>
+                <Scene heading={block.value.heading} scene={scene} id={id} width={block.value.width}>
                   <Work
                     work={work}
                     items={block.value.items}
@@ -128,8 +131,9 @@ const jsonLd = {
         return (
           <>
             {cut && (
-              <p class="page sp-transition" aria-hidden="true">
-                {cut}
+              <p class="page" aria-hidden="true">
+                {/* Line up with a Wide / Full width block below it */}
+                <span class:list={['sp-transition', wideBlock(block) && `bleed bleed-${wideBlock(block)} wide-cut`]}>{cut}</span>
               </p>
             )}
             {content}
@@ -170,6 +174,16 @@ const jsonLd = {
   @media (max-width: 34rem) {
     .posters {
       grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .reel :global(.sp-transition) {
+    display: block;
+  }
+
+  @media (min-width: 52rem) {
+    .wide-cut {
+      padding-inline: 6ch;
     }
   }
 

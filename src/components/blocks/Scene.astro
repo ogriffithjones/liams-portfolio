@@ -1,17 +1,48 @@
 ---
 // A titled section of the page, laid out like a scene: heading, then content.
+import type { Width } from '../../lib/options';
+
 interface Props {
   heading: string;
   scene: number;
   id: string;
+  /** When the content breaks out of the column, the heading row matches it */
+  width?: Width;
 }
 
-const { heading, scene, id } = Astro.props;
+const { heading, scene, id, width = 'script' } = Astro.props;
+const wide = width !== 'script';
 ---
 
 <section class="page sp" aria-labelledby={id}>
-  {heading && <h2 id={id} class="sp-scene" data-scene={scene}>{heading}</h2>}
+  {
+    heading && (
+      <h2 id={id} class:list={['sp-scene', wide && `bleed bleed-${width} wide-heading`]} data-scene={scene}>
+        {heading}
+      </h2>
+    )
+  }
   <div class="body">
     <slot />
   </div>
 </section>
+
+<style>
+  /* Wide blocks: scene numbers sit flush with the grid's edges, with the
+     heading just inside them, instead of floating mid-grid */
+  @media (min-width: 52rem) {
+    .wide-heading {
+      padding-inline: 6ch;
+    }
+
+    .wide-heading[data-scene]::before {
+      right: auto;
+      left: 0;
+    }
+
+    .wide-heading[data-scene]::after {
+      left: auto;
+      right: 0;
+    }
+  }
+</style>
