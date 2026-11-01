@@ -41,7 +41,7 @@ blocks:
       aspect: wide
       width: script
       captions: full
-      preview: hover
+      preview: autoplay
       cut: 'CUT TO:'
       hidden: false
   - discriminant: watching
