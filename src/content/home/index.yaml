@@ -38,7 +38,7 @@ blocks:
       items:
         - echo
       columns: '1'
-      aspect: wide
+      aspect: scope
       width: script
       captions: full
       preview: hover
