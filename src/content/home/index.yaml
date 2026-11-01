@@ -49,12 +49,12 @@ blocks:
       heading: INT. SCREENING ROOM — NIGHT
       username: '25660'
       count: 4
-      cut: ''
+      cut: 'CUT TO:'
       hidden: false
   - discriminant: text
     value:
       body: My Letterboxd. The last 4 films I watched and my rating for them.
-      cut: 'CUT TO:'
+      cut: ''
       hidden: false
   - discriminant: contact
     value:
