@@ -84,7 +84,8 @@ const { size, height, animate } = Astro.props;
       const firstX = ((width / 2) % spacing) - spacing;
       for (let row = 0, y = rowStep / 2; y < height; row++, y += rowStep) {
         const depth = y / height; // 0 at the top, 1 at the bottom of the band
-        const base = spacing * 0.5 * (1 - depth) ** 1.5;
+        // Largest dots leave paper showing between them, so the top never goes solid
+        const base = spacing * 0.37 * (1 - depth) ** 1.5;
         const rowAlpha = 1 - depth * 0.6;
         // Print in top-down: each row starts a little after the one above
         const rowIn = ease((printed * 1.25 - depth) / 0.25);
