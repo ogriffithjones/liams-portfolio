@@ -1,5 +1,6 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 import { aspects, captions, columns, endings, filmLayouts, previews, ratings, transitions, widths } from './src/lib/options';
+import { editorialComponents } from './src/lib/editorial';
 import { accents, dotColours, dotHeights, dotSizes, hexPattern, modes, palettes } from './src/lib/themes';
 
 // Locally, edits are written straight to the files in this repo.
@@ -607,6 +608,7 @@ export default config({
         content: fields.markdoc({
           label: 'Review',
           options: { image: { directory: 'src/assets/reviews', publicPath: '../../assets/reviews/' } },
+          components: editorialComponents('src/assets/reviews', '../../assets/reviews/'),
         }),
       },
     }),
@@ -657,7 +659,7 @@ export default config({
       },
     }),
     notes: collection({
-      label: 'Notes on film',
+      label: 'Notes / opinion pieces',
       slugField: 'title',
       path: 'src/content/notes/*',
       format: { contentField: 'content' },
@@ -669,16 +671,45 @@ export default config({
         film: fields.text({ label: 'Film', description: 'e.g. Film Title (1984)' }),
         summary: fields.text({
           label: 'Summary',
-          description: 'One sentence. Shown in search results.',
+          description: 'One sentence. Shown in lists and search results.',
           multiline: true,
           validation: { isRequired: true, length: { max: 200 } },
         }),
+        standfirst: fields.text({
+          label: 'Standfirst',
+          description: 'Optional. The line under the headline that sets up the piece.',
+          multiline: true,
+        }),
+        byline: fields.text({ label: 'Byline', description: 'Leave empty to use your name.' }),
+        lead: fields.object(
+          {
+            image: fields.image({ label: 'Lead image', directory: 'src/assets/notes', publicPath: '../../assets/notes/' }),
+            alt: fields.text({ label: 'Description (alt text)' }),
+            caption: fields.text({ label: 'Caption', multiline: true }),
+            credit: fields.text({ label: 'Credit', description: 'e.g. Paris, Texas (1984), Road Movies / 20th Century Fox' }),
+          },
+          { label: 'Lead image', description: 'Optional. Shown large under the headline.' },
+        ),
+        spoilers: fields.checkbox({ label: 'Spoiler warning', description: 'Shows a warning at the top of the piece.' }),
+        dropCap: fields.checkbox({ label: 'Drop cap', description: 'Large first letter on the opening paragraph.' }),
+        filmBox: fields.object(
+          {
+            show: fields.checkbox({ label: 'Show a film details box', description: 'At the end of the piece, titled with the Film above.' }),
+            director: fields.text({ label: 'Director' }),
+            runtime: fields.text({ label: 'Runtime', description: 'e.g. 2h 25m' }),
+            country: fields.text({ label: 'Country' }),
+            where: fields.text({ label: 'Where to watch', description: 'e.g. In cinemas, Netflix' }),
+            link: fields.url({ label: 'Link', description: 'e.g. Letterboxd or IMDb' }),
+          },
+          { label: 'Film details' },
+        ),
         draft: fields.checkbox({ label: 'Draft', description: 'Drafts are hidden from the live site' }),
         content: fields.markdoc({
           label: 'Content',
           options: {
             image: { directory: 'src/assets/notes', publicPath: '../../assets/notes/' },
           },
+          components: editorialComponents('src/assets/notes', '../../assets/notes/'),
         }),
       },
     }),

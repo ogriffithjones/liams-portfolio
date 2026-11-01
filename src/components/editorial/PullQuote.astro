@@ -1,0 +1,44 @@
+---
+interface Props {
+  quote?: string;
+  attribution?: string;
+}
+
+const { quote, attribution } = Astro.props;
+---
+
+{
+  quote && (
+    <figure class="pull">
+      <blockquote>“{quote.trim()}”</blockquote>
+      {attribution && <figcaption>— {attribution}</figcaption>}
+    </figure>
+  )
+}
+
+<style>
+  .pull {
+    margin: 2.5lh 0;
+    padding-block: 1lh;
+    border-block: 1px solid var(--line);
+    text-align: center;
+  }
+
+  /* Override the plain prose blockquote style */
+  .pull blockquote {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: var(--ink);
+    font-size: 1.35em;
+    line-height: 1.35;
+    font-style: italic;
+  }
+
+  figcaption {
+    margin-top: 0.75lh;
+    color: var(--accent, var(--muted));
+    font-size: 0.875em;
+    text-transform: uppercase;
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../lib/assets';
+
+interface Props {
+  images?: { image?: string; alt?: string }[];
+  caption?: string;
+  credit?: string;
+  columns?: '2' | '3';
+}
+
+const { images = [], caption, credit, columns = '2' } = Astro.props;
+const stills = images.map((s) => ({ src: resolveImage(s.image), alt: s.alt ?? '' })).filter((s) => s.src);
+const sizes = `(min-width: 80rem) calc(76rem / ${columns}), ${columns === '3' ? '33vw' : '50vw'}`;
+---
+
+{
+  stills.length > 0 && (
+    <figure class="stills bleed bleed-wide">
+      <div class="grid" style={`--n: ${columns}`}>
+        {stills.map((s) => (
+          <Image src={s.src!} alt={s.alt} widths={[480, 720, 960, 1280]} sizes={sizes} />
+        ))}
+      </div>
+      {(caption || credit) && (
+        <figcaption>
+          {caption && <span>{caption}</span>}
+          {credit && <span class="credit">{credit}</span>}
+        </figcaption>
+      )}
+    </figure>
+  )
+}
+
+<style>
+  .stills {
+    margin-block: 2.5lh;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 1ch;
+  }
+
+  .grid :global(img) {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    margin: 0;
+  }
+
+  @media (max-width: 30rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25lh 2ch;
+    max-width: calc(60ch + var(--gutter) * 2);
+    margin: 0.75lh auto 0;
+    padding-inline: var(--gutter);
+    font-size: 0.8125em;
+    line-height: 1.45;
+  }
+
+  .credit {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+</style>

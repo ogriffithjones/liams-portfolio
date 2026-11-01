@@ -31,6 +31,10 @@ body {
     color 0.4s var(--ease);
 }
 
+figure {
+  margin: 0;
+}
+
 img {
   display: block;
   max-width: 100%;
@@ -219,7 +223,14 @@ p {
   line-height: 1.6;
 }
 
-.prose > * + * {
+/* Markdoc wraps the text in an <article>, so its children count too */
+.prose > *,
+.prose > article > * {
+  margin-block: 0;
+}
+
+.prose > * + *,
+.prose > article > * + * {
   margin-top: 1.25em;
 }
 

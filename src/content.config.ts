@@ -246,11 +246,28 @@ const lists = defineCollection({
 
 const notes = defineCollection({
   loader: glob({ pattern: '*.mdoc', base: './src/content/notes' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     date: z.coerce.date(),
     film: optional,
     summary: z.string(),
+    standfirst: optional,
+    byline: optional,
+    lead: z
+      .object({ image: image().nullish(), alt: optional, caption: optional, credit: optional })
+      .prefault({}),
+    spoilers: z.boolean().default(false),
+    dropCap: z.boolean().default(false),
+    filmBox: z
+      .object({
+        show: z.boolean().default(false),
+        director: optional,
+        runtime: optional,
+        country: optional,
+        where: optional,
+        link: url,
+      })
+      .prefault({}),
     draft: z.boolean().default(false),
   }),
 });

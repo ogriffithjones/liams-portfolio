@@ -1,0 +1,64 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../lib/assets';
+
+interface Props {
+  image?: string;
+  alt?: string;
+  caption?: string;
+  credit?: string;
+  size?: 'text' | 'wide' | 'full';
+}
+
+const { image, alt = '', caption, credit, size = 'wide' } = Astro.props;
+const src = resolveImage(image);
+const sizes = { text: '(min-width: 42rem) 38rem, 100vw', wide: '(min-width: 80rem) 76rem, 100vw', full: '100vw' }[size];
+---
+
+{
+  src && (
+    <figure class:list={['figure', size !== 'text' && `bleed bleed-${size}`]}>
+      <Image src={src} alt={alt} widths={[640, 960, 1280, 1920, 2560]} sizes={sizes} />
+      {(caption || credit) && (
+        <figcaption>
+          {caption && <span class="caption">{caption}</span>}
+          {credit && <span class="credit">{credit}</span>}
+        </figcaption>
+      )}
+    </figure>
+  )
+}
+
+<style>
+  .figure {
+    margin-block: 2.5lh;
+  }
+
+  .figure :global(img) {
+    width: 100%;
+    height: auto;
+    margin: 0;
+  }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25lh 2ch;
+    margin-top: 0.75lh;
+    font-size: 0.8125em;
+    line-height: 1.45;
+  }
+
+  .bleed figcaption {
+    max-width: calc(60ch + var(--gutter) * 2);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .credit {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+</style>

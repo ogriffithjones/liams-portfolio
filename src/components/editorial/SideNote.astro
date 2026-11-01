@@ -1,0 +1,66 @@
+---
+// Numbered side notes: in the right margin on wide screens, a small note
+// beneath the line on phones. Numbering is done with CSS counters.
+interface Props {
+  note?: string;
+}
+
+const { note } = Astro.props;
+---
+
+{
+  note && (
+    <span class="fn">
+      <span class="ref" aria-hidden="true" />
+      <span class="text" role="note">
+        {note}
+      </span>
+    </span>
+  )
+}
+
+<style is:global>
+  .prose {
+    counter-reset: sidenote;
+  }
+
+  .fn {
+    counter-increment: sidenote;
+  }
+
+  .fn .ref::after {
+    content: counter(sidenote);
+    position: relative;
+    top: -0.5em;
+    margin-left: 0.15ch;
+    font-size: 0.7em;
+    color: var(--accent, var(--muted));
+  }
+
+  .fn .text {
+    display: block;
+    margin: 0.5lh 0;
+    padding-left: 2ch;
+    border-left: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.8125em;
+    line-height: 1.45;
+  }
+
+  .fn .text::before {
+    content: counter(sidenote) '. ';
+    color: var(--accent, var(--muted));
+  }
+
+  /* Wide screens: into the right margin, like a book's side notes */
+  @media (min-width: 76rem) {
+    .fn .text {
+      float: right;
+      clear: right;
+      width: 24ch;
+      margin: 0 calc(-24ch - 4ch) 0 0;
+      padding-left: 0;
+      border: 0;
+    }
+  }
+</style>
