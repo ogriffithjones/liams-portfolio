@@ -4,3 +4,10 @@ items:
     value:
       page: reviews
       label: Reviews
+  - discriminant: home
+    value:
+      label: Home
+  - discriminant: page
+    value:
+      page: projects
+      label: Portfollio
