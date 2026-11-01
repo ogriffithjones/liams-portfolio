@@ -9,6 +9,6 @@ dots:
   value:
     colour:
       discriminant: sage
-    size: medium
+    size: fine
     height: tall
     animate: true
