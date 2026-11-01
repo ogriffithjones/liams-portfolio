@@ -11,3 +11,5 @@ fullScript: request
 excerptShow:
   discriminant: all
 excerptMarks: both
+excerptLabel:
+  discriminant: excerpt
