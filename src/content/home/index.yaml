@@ -19,9 +19,20 @@ blocks:
       hidden: false
   - discriminant: work
     value:
-      heading: INT. WORK — DAY
+      heading: INT. Directing — DAY
       items: []
-      columns: '2'
+      columns: '1'
+      aspect: wide
+      width: script
+      captions: full
+      preview: hover
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: work
+    value:
+      heading: INT. Writing— DAY
+      items: []
+      columns: '4'
       aspect: wide
       width: wide
       captions: full
