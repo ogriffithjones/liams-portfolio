@@ -19,7 +19,7 @@ blocks:
       hidden: false
   - discriminant: work
     value:
-      heading: INT. Main Project— DAY
+      heading: INT. Main Project — DAY
       items:
         - jekyll-and-hyde
       columns: '1'
@@ -39,7 +39,7 @@ blocks:
       hidden: false
   - discriminant: work
     value:
-      heading: INT. Writing— DAY
+      heading: INT. Writing — DAY
       items:
         - the-muppet-show
         - a-study-of-life-and-death
