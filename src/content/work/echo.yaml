@@ -3,3 +3,9 @@ year: 2025
 role: Co-Writer / Co-Director / Co-Editer
 description: 'A young woman''s journey through grief told through dance. '
 video: https://www.youtube.com/watch?v=rnDYdluMIOY
+fullScript: request
+excerptShow:
+  discriminant: all
+excerptMarks: both
+excerptLabel:
+  discriminant: excerpt
