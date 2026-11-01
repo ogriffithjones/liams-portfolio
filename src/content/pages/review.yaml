@@ -4,7 +4,7 @@ blocks:
   - discriminant: writing
     value:
       heading: INT. Opinions — NIGHT
-      show: opinion
+      show: review
       count: 4
       layout: posters
       columns: '4'
