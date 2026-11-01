@@ -311,7 +311,8 @@ export default config({
         }),
         excerptFile: fields.file({
           label: 'Script file (.fdx or .fountain)',
-          description: 'Optional. In WriterDuet: Export → Final Draft (.fdx). Used instead of the pasted excerpt when both are set.',
+          description:
+            'Optional. .fdx or .fountain only (not PDF). In WriterDuet: Export → Final Draft (.fdx). Used instead of the pasted excerpt when both are set.',
           directory: 'src/data/scripts',
           publicPath: 'src/data/scripts/',
         }),

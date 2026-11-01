@@ -210,13 +210,19 @@ export function parseFountain(source: string): Element[] {
 
 // ---------------------------------------------------------------- loading
 
-export async function loadExcerpt(data: { excerpt?: string | undefined; excerptFile?: string | null | undefined }) {
-  if (data.excerptFile) {
-    const file = await readFile(resolve(process.cwd(), data.excerptFile.replace(/^\/+/, '')), 'utf8');
-    return extname(data.excerptFile).toLowerCase() === '.fdx' ? parseFdx(file) : parseFountain(file);
+type Source = { excerpt?: string | undefined; excerptFile?: string | null | undefined };
+
+/** Script files we can read; anything else (PDF, Word…) is ignored, not mangled. */
+const readable = (file: string | null | undefined) =>
+  !!file && ['.fdx', '.fountain', '.spmd', '.txt'].includes(extname(file).toLowerCase());
+
+export async function loadExcerpt(data: Source) {
+  if (readable(data.excerptFile)) {
+    const file = await readFile(resolve(process.cwd(), data.excerptFile!.replace(/^\/+/, '')), 'utf8');
+    return extname(data.excerptFile!).toLowerCase() === '.fdx' ? parseFdx(file) : parseFountain(file);
   }
+  if (data.excerptFile) console.warn(`[excerpt] ${data.excerptFile}: only .fdx and .fountain files can be shown`);
   return data.excerpt?.trim() ? parseFountain(data.excerpt) : [];
 }
 
-export const hasExcerpt = (data: { excerpt?: string | undefined; excerptFile?: string | null | undefined }) =>
-  Boolean(data.excerptFile || data.excerpt?.trim());
+export const hasExcerpt = (data: Source) => readable(data.excerptFile) || Boolean(data.excerpt?.trim());
