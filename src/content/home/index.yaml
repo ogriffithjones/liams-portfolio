@@ -17,52 +17,6 @@ blocks:
       typewriter: true
       cut: ''
       hidden: false
-  - discriminant: work
-    value:
-      heading: INT. Main Project — DAY
-      items:
-        - jekyll-and-hyde
-      columns: '1'
-      aspect: wide
-      width: script
-      captions: full
-      preview: hover
-      cut: 'CUT TO:'
-      hidden: false
-  - discriminant: list
-    value:
-      list: list-title-one
-      count: 8
-      layout: posters
-      columns: '4'
-      cut: ''
-      hidden: false
-  - discriminant: work
-    value:
-      heading: INT. Writing — DAY
-      items:
-        - the-muppet-show
-        - a-study-of-life-and-death
-        - project-title-two
-      columns: '3'
-      aspect: square
-      width: wide
-      captions: full
-      preview: hover
-      cut: 'CUT TO:'
-      hidden: false
-  - discriminant: work
-    value:
-      heading: INT. Directing — DAY
-      items:
-        - echo
-      columns: '1'
-      aspect: wide
-      width: script
-      captions: full
-      preview: autoplay
-      cut: 'CUT TO:'
-      hidden: false
   - discriminant: text
     value:
       heading: INT. SCREENING ROOM — NIGHT
