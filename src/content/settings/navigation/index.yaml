@@ -1,0 +1,6 @@
+show: true
+items:
+  - discriminant: page
+    value:
+      page: reviews
+      label: Reviews
