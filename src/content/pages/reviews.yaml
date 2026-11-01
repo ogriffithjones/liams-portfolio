@@ -1,12 +1,17 @@
 title: Reviews
 showTitle: true
 blocks:
-  - discriminant: watching
+  - discriminant: text
     value:
       heading: INT. SCREENING ROOM — NIGHT
-      username: '25560'
+      body: What I've been watching...
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: watching
+    value:
+      username: '25660'
       count: 4
-      cut: 'FADE TO:'
+      cut: ''
       hidden: false
 ending:
   transition: FADE OUT.
