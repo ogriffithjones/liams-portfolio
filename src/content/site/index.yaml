@@ -1,14 +1,12 @@
 name: Liam Dunstan
 role: Screen Writer
-email: hello@example.com
-location: City, Country
+email: liamdwriting@gmail.com
+location: New Zealand
 links:
   - label: Letterboxd
     url: https://letterboxd.com/25660/
-  - label: Instagram
-    url: https://instagram.com/
-  - label: Vimeo
-    url: https://vimeo.com/
+  - label: LinkdIn
+    url: https://www.linkedin.com/
 reviewsPage: true
 theme:
   palette:
@@ -22,8 +20,8 @@ theme:
     value:
       colour:
         discriminant: sage
-      size: fine
-      height: medium
+      size: medium
+      height: tall
       animate: true
 seoDescription: >-
   Search description placeholder. One or two sentences about Liam Dunstan and
