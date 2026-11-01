@@ -33,7 +33,7 @@ blocks:
     value:
       heading: INT. VIDEO SHOP — DAY
       list: list-title-one
-      count: 6
+      count: 8
       layout: posters
       columns: '3'
       cut: ''
