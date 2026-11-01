@@ -20,7 +20,8 @@ blocks:
   - discriminant: work
     value:
       heading: INT. Directing — DAY
-      items: []
+      items:
+        - echo
       columns: '1'
       aspect: wide
       width: script
@@ -31,9 +32,13 @@ blocks:
   - discriminant: work
     value:
       heading: INT. Writing— DAY
-      items: []
+      items:
+        - jekyll-and-hyde
+        - the-muppet-show
+        - a-study-of-life-and-death
+        - project-title-two
       columns: '4'
-      aspect: wide
+      aspect: portrait
       width: wide
       captions: full
       preview: hover
