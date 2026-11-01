@@ -1,4 +1,4 @@
-title: Projects
+title: 'Portfolio '
 showTitle: true
 blocks:
   - discriminant: work
@@ -45,7 +45,7 @@ blocks:
       width: script
       captions: full
       preview: hover
-      cut: 'CUT TO:'
+      cut: ''
       hidden: false
 ending:
   transition: FADE OUT.
