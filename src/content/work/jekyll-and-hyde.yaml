@@ -3,6 +3,8 @@ year: 2026
 role: Writer
 description: Modern Adaptation of Dr. Jekyll & Mr. Hyde
 imageAlt: Jekyll & Hyde
-excerptFile: src/data/scripts/jekyll-and-hyde/excerptFile.fountain
+excerptFile: src/data/scripts/jekyll-and-hyde/excerptFile.png
+fullScript: request
 excerptShow:
   discriminant: all
+excerptMarks: auto
