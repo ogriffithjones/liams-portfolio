@@ -210,62 +210,76 @@ export function parseFountain(source: string): Element[] {
 
 // ---------------------------------------------------------------- scene selection
 
-/** "1-3, 7, 10-" → is scene n wanted? Returns null for an empty or unreadable spec. */
-function sceneFilter(spec: string | undefined) {
-  const ranges = (spec ?? '')
-    .split(/[,;\s]+/)
-    .map((part) => part.match(/^(\d+)(?:\s*[-–]\s*(\d*))?$/))
-    .filter((m): m is RegExpMatchArray => !!m)
-    .map(([, from, to]) => [Number(from), to === undefined ? Number(from) : to === '' ? Infinity : Number(to)] as const);
-  return ranges.length ? (n: number) => ranges.some(([a, b]) => n >= a && n <= b) : null;
-}
+const plain = (html: string) => html.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&');
 
 /**
- * Keep only the chosen scenes. Anything before the first scene heading
- * (FADE IN:, etc.) goes with scene 1. Scenes keep their number from the full
- * script, and a gap marker shows where scenes were left out.
+ * Keep the chosen scenes, in the order they were typed. The spec is a comma
+ * list of scene numbers (3), ranges (5-8, 12-) and words from a heading
+ * (KITCHEN). Anything before the first heading (FADE IN:, etc.) goes with
+ * scene 1. Scenes keep their number from the full script.
  */
-export function selectScenes(elements: Element[], spec: string | undefined): Element[] {
-  const wanted = sceneFilter(spec);
-  if (!wanted) return elements;
-
+export function selectScenes(elements: Element[], spec: string, { gaps = true } = {}): Element[] {
   const scenes: Element[][] = [[]];
   for (const el of elements) {
     if (el.kind === 'scene') scenes.push([]);
     scenes.at(-1)!.push(el);
   }
-  // scenes[0] is anything before the first heading, kept along with scene 1
-  const out: Element[] = [];
-  let lastKept = -1;
-  scenes.forEach((scene, n) => {
-    if (!scene.length || !wanted(Math.max(n, 1))) return;
-    if (lastKept >= 0 && n > lastKept + 1) out.push({ kind: 'gap', html: '…' });
-    for (const el of scene) out.push(el.kind === 'scene' && !el.scene ? { ...el, scene: String(n) } : el);
-    lastKept = n;
-  });
-  if (!out.some((el) => el.kind !== 'gap')) {
-    console.warn(`[excerpt] "Scenes to show" (${spec}) matched nothing; showing the whole script`);
+  const count = scenes.length - 1;
+  const heading = (n: number) => plain(scenes[n]![0]!.html).toUpperCase();
+
+  const order: number[] = [];
+  for (const token of spec.split(/[,;\n]+/).map((t) => t.trim()).filter(Boolean)) {
+    const range = token.match(/^(\d+)\s*(?:[-–]\s*(\d*))?$/);
+    let picked: number[] = [];
+    if (range) {
+      const from = Number(range[1]);
+      const to = range[2] === undefined ? from : range[2] === '' ? count : Number(range[2]);
+      for (let n = Math.max(from, 1); n <= Math.min(to, count); n++) picked.push(n);
+    } else {
+      const words = token.toUpperCase();
+      for (let n = 1; n <= count; n++) if (heading(n).includes(words)) picked.push(n);
+    }
+    for (const n of picked) if (!order.includes(n)) order.push(n);
+  }
+
+  if (!order.length) {
+    console.warn(`[excerpt] Scenes "${spec}" matched nothing; showing the whole script`);
     return elements;
   }
+
+  const out: Element[] = [];
+  order.forEach((n, i) => {
+    if (gaps && i > 0 && n !== order[i - 1]! + 1) out.push({ kind: 'gap', html: '…' });
+    if (n === 1) out.push(...scenes[0]!);
+    for (const el of scenes[n]!) out.push(el.kind === 'scene' && !el.scene ? { ...el, scene: String(n) } : el);
+  });
   return out;
 }
 
 // ---------------------------------------------------------------- loading
 
-type Source = { excerpt?: string | undefined; excerptFile?: string | null | undefined; excerptScenes?: string | undefined };
+type Show = { discriminant: 'all' | 'off'; value?: unknown } | { discriminant: 'chosen'; value: { scenes: string; gaps: boolean } };
+type Source = { excerpt?: string | undefined; excerptFile?: string | null | undefined; excerptShow?: Show | undefined };
 
 /** Script files we can read; anything else (PDF, Word…) is ignored, not mangled. */
 const readable = (file: string | null | undefined) =>
   !!file && ['.fdx', '.fountain', '.spmd', '.txt'].includes(extname(file).toLowerCase());
 
 export async function loadExcerpt(data: Source) {
+  let elements: Element[] = [];
   if (readable(data.excerptFile)) {
     const file = await readFile(resolve(process.cwd(), data.excerptFile!.replace(/^\/+/, '')), 'utf8');
-    const elements = extname(data.excerptFile!).toLowerCase() === '.fdx' ? parseFdx(file) : parseFountain(file);
-    return selectScenes(elements, data.excerptScenes);
+    elements = extname(data.excerptFile!).toLowerCase() === '.fdx' ? parseFdx(file) : parseFountain(file);
+  } else {
+    if (data.excerptFile) console.warn(`[excerpt] ${data.excerptFile}: only .fdx and .fountain files can be shown`);
+    if (data.excerpt?.trim()) elements = parseFountain(data.excerpt);
   }
-  if (data.excerptFile) console.warn(`[excerpt] ${data.excerptFile}: only .fdx and .fountain files can be shown`);
-  return data.excerpt?.trim() ? selectScenes(parseFountain(data.excerpt), data.excerptScenes) : [];
+  const show = data.excerptShow;
+  return show?.discriminant === 'chosen' && show.value.scenes.trim()
+    ? selectScenes(elements, show.value.scenes, { gaps: show.value.gaps })
+    : elements;
 }
 
-export const hasExcerpt = (data: Source) => readable(data.excerptFile) || Boolean(data.excerpt?.trim());
+/** Whether a project has a script to show (and it isn't switched off). */
+export const hasExcerpt = (data: Source) =>
+  data.excerptShow?.discriminant !== 'off' && (readable(data.excerptFile) || Boolean(data.excerpt?.trim()));

@@ -101,7 +101,16 @@ const work = defineCollection({
       link: url,
       excerpt: z.string().optional(),
       excerptFile: z.string().nullish(),
-      excerptScenes: z.string().optional(),
+      excerptShow: z
+        .discriminatedUnion('discriminant', [
+          z.object({ discriminant: z.literal('all'), value: z.unknown().optional() }),
+          z.object({ discriminant: z.literal('off'), value: z.unknown().optional() }),
+          z.object({
+            discriminant: z.literal('chosen'),
+            value: z.object({ scenes: z.string().default(''), gaps: z.boolean().default(true) }),
+          }),
+        ])
+        .default({ discriminant: 'all' }),
     }),
 });
 

@@ -316,11 +316,34 @@ export default config({
           directory: 'src/data/scripts',
           publicPath: 'src/data/scripts/',
         }),
-        excerptScenes: fields.text({
-          label: 'Scenes to show',
-          description:
-            'Optional. Which scenes to show, counting scene headings from the top, e.g. 1-3, 7. Leave empty to show everything. The site only shows these, but the whole uploaded file is stored in the public GitHub repo, so trim private scripts before uploading.',
-        }),
+        excerptShow: fields.conditional(
+          fields.select({
+            label: 'Script on site',
+            description: 'Whether the script excerpt or file above appears on the project’s page.',
+            options: [
+              { label: 'Whole script', value: 'all' },
+              { label: 'Chosen scenes', value: 'chosen' },
+              { label: 'Off (keep it, don’t show it)', value: 'off' },
+            ],
+            defaultValue: 'all',
+          }),
+          {
+            all: fields.empty(),
+            off: fields.empty(),
+            chosen: fields.object({
+              scenes: fields.text({
+                label: 'Scenes',
+                description:
+                  'Any mix, in the order you want them shown, separated by commas: scene numbers (3), ranges (5-8, or 12- for the rest), or words from a scene heading (KITCHEN). The whole uploaded file is still stored in the public GitHub repo, so trim private scripts before uploading.',
+              }),
+              gaps: fields.checkbox({
+                label: 'Mark skipped scenes with …',
+                description: 'Shown between scenes that aren’t next to each other in the script.',
+                defaultValue: true,
+              }),
+            }),
+          },
+        ),
       },
     }),
     reviews: collection({
