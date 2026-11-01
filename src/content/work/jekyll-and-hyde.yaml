@@ -8,6 +8,6 @@ excerptFile: src/data/scripts/jekyll-and-hyde/excerptFile.fountain
 fullScript: request
 excerptShow:
   discriminant: all
-excerptMarks: auto
+excerptMarks: both
 excerptLabel:
-  discriminant: auto
+  discriminant: excerpt
