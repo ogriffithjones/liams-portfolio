@@ -29,7 +29,6 @@ Open <http://127.0.0.1:4321/admin>. Locally, saving writes straight to the files
 | Block | Notes |
 | --- | --- |
 | Script | Lines of screenplay: scene heading, action, character, parenthetical, dialogue, transition, centered. The first script with "Type out on load" ticked types itself out once per visit. |
-| Transition | `CUT TO:`, `DISSOLVE TO:`, `FADE OUT.`, etc. Right-aligned. |
 | Recently watched | Latest films from a public Letterboxd account. Hidden on the live site while the username is empty. |
 | Work | Chosen projects in the order picked, or all projects (newest first). Options: columns (1–4), image shape (widescreen, scope, 4:3, square, portrait, poster), width (script column, wide, full), captions, and video previews (hover, autoplay, off). |
 | Reviews | The latest reviews as posters or a list, linking to `/reviews`. |
@@ -38,7 +37,9 @@ Open <http://127.0.0.1:4321/admin>. Locally, saving writes straight to the files
 | Text | A heading and paragraphs. |
 | Contact | Email, location and links from Site settings. |
 
-Scene numbers are worked out automatically. A block with nothing to show is skipped, along with the transition leading into it.
+Every block also has **Transition before** (`CUT TO:`, `DISSOLVE TO:`, `SMASH CUT TO:`, … or none), printed right-aligned above it, and a **Hide** switch to take it off the page without deleting it. The **Ending** setting below the blocks controls the closing `FADE OUT.` and `THE END`.
+
+Scene numbers are worked out automatically. A block that's hidden or has nothing to show is skipped, along with its transition.
 
 The name on the title page always comes first, so the page always has its `<h1>`.
 

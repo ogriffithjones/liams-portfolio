@@ -1,9 +1,8 @@
 import { getEntry, type CollectionEntry } from 'astro:content';
 
-export type Block = CollectionEntry<'home'>['data']['blocks'][number];
+type Home = CollectionEntry<'home'>['data'];
+export type Block = Home['blocks'][number];
 export type ScriptLine = Extract<Block, { discriminant: 'script' }>['value']['lines'][number];
-
-const titled: Block['discriminant'][] = ['watching', 'work', 'reviews', 'list', 'notes', 'text', 'contact'];
 
 interface Available {
   work: boolean;
@@ -15,14 +14,14 @@ interface Available {
 }
 
 /**
- * Home page blocks in CMS order, with scene numbers worked out and
- * empty blocks (and the transition leading into them) dropped.
+ * Home page blocks in CMS order, without hidden or empty ones, with scene
+ * numbers worked out and the transition to print before each.
  */
-export async function getBlocks(available: Available) {
-  const blocks = (await getEntry('home', 'index'))?.data.blocks ?? [];
+export async function getHome(available: Available) {
+  const home = (await getEntry('home', 'index'))?.data;
+  const blocks = home?.blocks ?? [];
 
-  const isEmpty = (b: Block | undefined) =>
-    !b ||
+  const isEmpty = (b: Block) =>
     (b.discriminant === 'watching' && !b.value.username && !available.dev) ||
     (b.discriminant === 'work' && !available.work) ||
     (b.discriminant === 'notes' && !available.notes) ||
@@ -30,20 +29,27 @@ export async function getBlocks(available: Available) {
     (b.discriminant === 'list' && !(b.value.list && available.lists.has(b.value.list))) ||
     (b.discriminant === 'script' && !b.value.lines.some((l) => l.text.trim()));
 
-  const visible = blocks.filter(
-    (b, i) => !isEmpty(b) && !(b.discriminant === 'transition' && i < blocks.length - 1 && isEmpty(blocks[i + 1])),
-  );
+  const visible = blocks.filter((b) => !b.value.hidden && !isEmpty(b));
 
   // Only the first script set to type out actually types.
   const typedIndex = visible.findIndex((b) => b.discriminant === 'script' && b.value.typewriter);
 
   let scene = 1;
-  return visible.map((block, index) => {
+  const shown = visible.map((block, index) => {
     const firstScene = scene;
     if (block.discriminant === 'script') scene += block.value.lines.filter((l) => l.kind === 'scene' && l.text.trim()).length;
-    else if (titled.includes(block.discriminant) && 'heading' in block.value && block.value.heading) scene++;
-    return { block, index, scene: firstScene, typed: index === typedIndex };
+    else if ('heading' in block.value && block.value.heading) scene++;
+    return {
+      block,
+      index,
+      scene: firstScene,
+      typed: index === typedIndex,
+      // Nothing to cut from at the very top of the page
+      cut: index === 0 ? '' : block.value.cut,
+    };
   });
+
+  return { blocks: shown, ending: home?.ending ?? { transition: 'FADE OUT.', theEnd: true } };
 }
 
 export const paragraphs = (text: string) =>

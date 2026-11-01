@@ -64,6 +64,23 @@ export const ratings = choices({
   '5': '★★★★★',
 });
 
+export const transitions = choices({
+  '': 'None',
+  'CUT TO:': 'CUT TO:',
+  'DISSOLVE TO:': 'DISSOLVE TO:',
+  'SMASH CUT TO:': 'SMASH CUT TO:',
+  'MATCH CUT TO:': 'MATCH CUT TO:',
+  'FADE TO:': 'FADE TO:',
+  'INTERCUT WITH:': 'INTERCUT WITH:',
+});
+
+export const endings = choices({
+  '': 'None',
+  'FADE OUT.': 'FADE OUT.',
+  'FADE TO BLACK.': 'FADE TO BLACK.',
+  'CUT TO BLACK.': 'CUT TO BLACK.',
+});
+
 export type Columns = (typeof columns.values)[number];
 export type Aspect = (typeof aspects.values)[number];
 export type Width = (typeof widths.values)[number];

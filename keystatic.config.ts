@@ -1,5 +1,5 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
-import { aspects, captions, columns, filmLayouts, previews, ratings, widths } from './src/lib/options';
+import { aspects, captions, columns, endings, filmLayouts, previews, ratings, transitions, widths } from './src/lib/options';
 
 // Locally, edits are written straight to the files in this repo.
 // In production, set PUBLIC_KEYSTATIC_GITHUB_REPO (e.g. "owner/liams-portfolio")
@@ -21,6 +21,18 @@ const select = <T extends { options: { value: string; label: string }[] }>(
   defaultValue: T['options'][number]['value'],
   description?: string,
 ) => fields.select({ label, options: choice.options, defaultValue, ...(description ? { description } : {}) });
+
+// Row labels in the Home page block list: "Type · heading · key settings"
+const label = (type: string, hidden: boolean, ...parts: (string | false | null | undefined)[]) =>
+  [hidden ? `${type} (hidden)` : type, ...parts.filter(Boolean)].join('  ·  ');
+
+const title = (slug: string) => slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+// Every home block ends with these two settings
+const extras = (cut: string) => ({
+  cut: select('Transition before', transitions, cut, 'Printed right-aligned above the block, like a script.'),
+  hidden: fields.checkbox({ label: 'Hide', description: 'Keep the block but leave it off the page.' }),
+});
 
 const elementLabels = {
   scene: 'Scene heading',
@@ -73,68 +85,98 @@ export default config({
         blocks: fields.blocks(
           {
             script: {
-              label: 'Script',
-              itemLabel: (props) =>
-                `Script: ${props.fields.lines.elements[0]?.fields.text.value.slice(0, 40) || 'empty'}`,
+              label: 'Script (screenplay lines)',
+              itemLabel: (props) => {
+                const lines = props.fields.lines.elements.map((l) => l.fields.text.value.trim()).filter(Boolean);
+                const scene = props.fields.lines.elements.find((l) => l.fields.kind.value === 'scene')?.fields.text.value;
+                return label('Script', props.fields.hidden.value, scene || lines[0] || 'empty', props.fields.typewriter.value && 'types out');
+              },
               schema: fields.object({
-                typewriter: fields.checkbox({
-                  label: 'Type out on load',
-                  description: 'Only the first script on the page types itself out.',
-                  defaultValue: true,
-                }),
                 lines: fields.array(scriptElement, {
                   label: 'Lines',
                   itemLabel: (props) =>
                     `${elementLabels[props.fields.kind.value as keyof typeof elementLabels]}: ${props.fields.text.value.slice(0, 50)}`,
                 }),
-              }),
-            },
-            transition: {
-              label: 'Transition',
-              itemLabel: (props) => `Transition: ${props.fields.text.value}`,
-              schema: fields.object({
-                text: fields.text({ label: 'Text', description: 'e.g. CUT TO:, DISSOLVE TO:, FADE OUT.', defaultValue: 'CUT TO:' }),
+                typewriter: fields.checkbox({
+                  label: 'Type out on load',
+                  description: 'Only the first script on the page types itself out.',
+                  defaultValue: true,
+                }),
+                ...extras(''),
               }),
             },
             watching: {
               label: 'Recently watched (Letterboxd)',
-              itemLabel: (props) => props.fields.heading.value || 'Recently watched',
+              itemLabel: (props) =>
+                label(
+                  'Recently watched',
+                  props.fields.hidden.value,
+                  props.fields.heading.value,
+                  props.fields.username.value ? `@${props.fields.username.value}` : 'no username',
+                  `${props.fields.count.value ?? 4} films`,
+                ),
               schema: fields.object({
                 heading: sceneHeading('INT. SCREENING ROOM — NIGHT'),
                 username: fields.text({ label: 'Letterboxd username', description: 'Hidden on the live site while empty.' }),
                 count: fields.integer({ label: 'How many films', defaultValue: 4, validation: { min: 1, max: 12 } }),
+                ...extras('CUT TO:'),
               }),
             },
             work: {
-              label: 'Work',
-              itemLabel: (props) => `${props.fields.heading.value || 'Work'} · ${props.fields.columns.value} across`,
+              label: 'Work (projects)',
+              itemLabel: (props) => {
+                const f = props.fields;
+                const chosen = f.items.elements.length;
+                return label(
+                  'Work',
+                  f.hidden.value,
+                  f.heading.value,
+                  chosen ? `${chosen} chosen` : 'all projects',
+                  `${f.columns.value} across, ${aspects.labels[f.aspect.value as keyof typeof aspects.labels].split(' ')[0]!.toLowerCase()}`,
+                );
+              },
               schema: fields.object({
                 heading: sceneHeading('INT. WORK — DAY'),
                 items: fields.array(fields.relationship({ label: 'Project', collection: 'work' }), {
                   label: 'Projects',
                   description: 'Pick and drag into order. Leave empty to show every project, newest first.',
-                  itemLabel: (props) => props.value ?? 'Choose a project',
+                  itemLabel: (props) => (props.value ? title(props.value) : 'Choose a project'),
                 }),
                 columns: select('Columns', columns, '1'),
                 aspect: select('Image shape', aspects, 'wide'),
                 width: select('Width', widths, 'script', 'Wide and full width break out of the text column.'),
                 captions: select('Captions', captions, 'full'),
                 preview: select('Video previews', previews, 'hover', 'For projects with a preview loop uploaded.'),
+                ...extras('CUT TO:'),
               }),
             },
             reviews: {
-              label: 'Reviews',
-              itemLabel: (props) => props.fields.heading.value || 'Reviews',
+              label: 'Reviews (latest)',
+              itemLabel: (props) =>
+                label(
+                  'Reviews',
+                  props.fields.hidden.value,
+                  props.fields.heading.value,
+                  `latest ${props.fields.count.value ?? 4}`,
+                  filmLayouts.labels[props.fields.layout.value as keyof typeof filmLayouts.labels].toLowerCase(),
+                ),
               schema: fields.object({
                 heading: sceneHeading('INT. REVIEWS — NIGHT'),
                 count: fields.integer({ label: 'How many reviews', defaultValue: 4, validation: { min: 1, max: 24 } }),
                 layout: select('Layout', filmLayouts, 'posters'),
                 columns: select('Columns (poster grid)', columns, '4'),
+                ...extras('CUT TO:'),
               }),
             },
             list: {
               label: 'Film list',
-              itemLabel: (props) => `List: ${props.fields.list.value ?? 'choose a list'}`,
+              itemLabel: (props) =>
+                label(
+                  'Film list',
+                  props.fields.hidden.value,
+                  props.fields.list.value ? title(props.fields.list.value) : 'choose a list',
+                  props.fields.count.value ? `first ${props.fields.count.value}` : 'all films',
+                ),
               schema: fields.object({
                 heading: sceneHeading('INT. VIDEO SHOP — DAY'),
                 list: fields.relationship({ label: 'List', collection: 'lists' }),
@@ -145,33 +187,55 @@ export default config({
                 }),
                 layout: select('Layout', filmLayouts, 'posters'),
                 columns: select('Columns (poster grid)', columns, '4'),
+                ...extras('CUT TO:'),
               }),
             },
             notes: {
               label: 'Notes on film',
-              itemLabel: (props) => props.fields.heading.value || 'Notes',
+              itemLabel: (props) =>
+                label(
+                  'Notes on film',
+                  props.fields.hidden.value,
+                  props.fields.heading.value,
+                  props.fields.limit.value ? `latest ${props.fields.limit.value}` : 'all notes',
+                ),
               schema: fields.object({
                 heading: sceneHeading('INT. NOTES ON FILM — NIGHT'),
                 limit: fields.integer({ label: 'How many notes', description: 'Leave empty to show all.' }),
+                ...extras('CUT TO:'),
               }),
             },
             text: {
               label: 'Text',
-              itemLabel: (props) => props.fields.heading.value || 'Text',
+              itemLabel: (props) =>
+                label('Text', props.fields.hidden.value, props.fields.heading.value, props.fields.body.value.slice(0, 40)),
               schema: fields.object({
                 heading: sceneHeading('INT. ANYWHERE — DAY'),
                 body: fields.text({ label: 'Text', description: 'Leave a blank line between paragraphs.', multiline: true }),
+                ...extras('CUT TO:'),
               }),
             },
             contact: {
               label: 'Contact',
-              itemLabel: (props) => props.fields.heading.value || 'Contact',
+              itemLabel: (props) => label('Contact', props.fields.hidden.value, props.fields.heading.value),
               schema: fields.object({
                 heading: sceneHeading('EXT. CONTACT — DAY'),
+                ...extras('CUT TO:'),
               }),
             },
           },
-          { label: 'Blocks', description: 'Add, remove and drag to reorder.' },
+          {
+            label: 'Blocks',
+            description:
+              'The page from top to bottom. Drag to reorder, click to edit. Each block has its own transition (CUT TO: etc.) and a Hide switch.',
+          },
+        ),
+        ending: fields.object(
+          {
+            transition: select('Final transition', endings, 'FADE OUT.'),
+            theEnd: fields.checkbox({ label: 'Show THE END', defaultValue: true }),
+          },
+          { label: 'Ending', description: 'Printed after the last block.' },
         ),
       },
     }),

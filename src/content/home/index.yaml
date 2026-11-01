@@ -17,17 +17,15 @@ blocks:
           text: beat
         - kind: dialogue
           text: Dialogue placeholder. A line or two, in your own voice.
-  - discriminant: transition
-    value:
-      text: 'CUT TO:'
+      cut: ''
+      hidden: false
   - discriminant: watching
     value:
       heading: INT. SCREENING ROOM — NIGHT
       username: '25660'
       count: 4
-  - discriminant: transition
-    value:
-      text: 'CUT TO:'
+      cut: 'CUT TO:'
+      hidden: false
   - discriminant: work
     value:
       heading: INT. WORK — DAY
@@ -37,18 +35,16 @@ blocks:
       width: wide
       captions: full
       preview: hover
-  - discriminant: transition
-    value:
-      text: 'CUT TO:'
+      cut: 'CUT TO:'
+      hidden: false
   - discriminant: reviews
     value:
       heading: INT. REVIEWS — NIGHT
       count: 4
       layout: posters
       columns: '4'
-  - discriminant: transition
-    value:
-      text: 'CUT TO:'
+      cut: 'CUT TO:'
+      hidden: false
   - discriminant: list
     value:
       heading: INT. VIDEO SHOP — DAY
@@ -56,25 +52,19 @@ blocks:
       count: 8
       layout: posters
       columns: '4'
-  - discriminant: transition
-    value:
-      text: 'CUT TO:'
+      cut: 'CUT TO:'
+      hidden: false
   - discriminant: notes
     value:
       heading: INT. NOTES ON FILM — NIGHT
       limit: null
-  - discriminant: transition
-    value:
-      text: 'CUT TO:'
+      cut: 'CUT TO:'
+      hidden: false
   - discriminant: contact
     value:
       heading: EXT. CONTACT — DAY
-  - discriminant: transition
-    value:
-      text: FADE OUT.
-  - discriminant: script
-    value:
-      typewriter: false
-      lines:
-        - kind: centered
-          text: THE END
+      cut: 'CUT TO:'
+      hidden: false
+ending:
+  transition: FADE OUT.
+  theEnd: true

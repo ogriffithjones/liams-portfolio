@@ -1,7 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
-import { aspects, captions, columns, filmLayouts, previews, ratings, widths } from './lib/options';
+import { aspects, captions, columns, endings, filmLayouts, previews, ratings, transitions, widths } from './lib/options';
 
 // These schemas mirror keystatic.config.ts. Keystatic edits the files,
 // Astro reads them at build time and optimises the images.
@@ -11,8 +11,16 @@ const heading = z.string().default('');
 const int = z.number().int().nullish();
 const url = z.url().nullish().or(z.literal(''));
 
-const block = <K extends string, V extends z.ZodType>(discriminant: K, value: V) =>
-  z.object({ discriminant: z.literal(discriminant), value });
+// Every home block also has a transition printed before it, and a Hide switch
+const block = <K extends string, S extends z.ZodRawShape>(discriminant: K, shape: S, cut = 'CUT TO:') =>
+  z.object({
+    discriminant: z.literal(discriminant),
+    value: z.object({
+      ...shape,
+      cut: z.enum(transitions.values).default(cut as (typeof transitions.values)[number]),
+      hidden: z.boolean().default(false),
+    }),
+  });
 
 export const scriptKinds = ['scene', 'action', 'character', 'parenthetical', 'dialogue', 'transition', 'centered'] as const;
 
@@ -24,50 +32,44 @@ const home = defineCollection({
         z.discriminatedUnion('discriminant', [
           block(
             'script',
-            z.object({
+            {
               typewriter: z.boolean().default(false),
               lines: z.array(z.object({ kind: z.enum(scriptKinds), text: z.string().default('') })).default([]),
-            }),
+            },
+            '',
           ),
-          block('transition', z.object({ text: z.string().default('CUT TO:') })),
-          block('watching', z.object({ heading, username: z.string().default(''), count: int })),
-          block(
-            'work',
-            z.object({
-              heading,
-              items: z.array(z.string().nullable()).default([]),
-              columns: z.enum(columns.values).default('1'),
-              aspect: z.enum(aspects.values).default('wide'),
-              width: z.enum(widths.values).default('script'),
-              captions: z.enum(captions.values).default('full'),
-              preview: z.enum(previews.values).default('hover'),
-            }),
-          ),
-          block(
-            'reviews',
-            z.object({
-              heading,
-              count: int,
-              layout: z.enum(filmLayouts.values).default('posters'),
-              columns: z.enum(columns.values).default('4'),
-            }),
-          ),
-          block(
-            'list',
-            z.object({
-              heading,
-              list: z.string().nullish(),
-              count: int,
-              layout: z.enum(filmLayouts.values).default('posters'),
-              columns: z.enum(columns.values).default('4'),
-            }),
-          ),
-          block('notes', z.object({ heading, limit: int })),
-          block('text', z.object({ heading, body: z.string().default('') })),
-          block('contact', z.object({ heading })),
+          block('watching', { heading, username: z.string().default(''), count: int }),
+          block('work', {
+            heading,
+            items: z.array(z.string().nullable()).default([]),
+            columns: z.enum(columns.values).default('1'),
+            aspect: z.enum(aspects.values).default('wide'),
+            width: z.enum(widths.values).default('script'),
+            captions: z.enum(captions.values).default('full'),
+            preview: z.enum(previews.values).default('hover'),
+          }),
+          block('reviews', {
+            heading,
+            count: int,
+            layout: z.enum(filmLayouts.values).default('posters'),
+            columns: z.enum(columns.values).default('4'),
+          }),
+          block('list', {
+            heading,
+            list: z.string().nullish(),
+            count: int,
+            layout: z.enum(filmLayouts.values).default('posters'),
+            columns: z.enum(columns.values).default('4'),
+          }),
+          block('notes', { heading, limit: int }),
+          block('text', { heading, body: z.string().default('') }),
+          block('contact', { heading }),
         ]),
       )
       .default([]),
+    ending: z
+      .object({ transition: z.enum(endings.values).default('FADE OUT.'), theEnd: z.boolean().default(true) })
+      .default({ transition: 'FADE OUT.', theEnd: true }),
   }),
 });
 
