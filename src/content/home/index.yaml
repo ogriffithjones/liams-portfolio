@@ -7,12 +7,13 @@ blocks:
         - kind: scene
           text: INT. WEBSITE — DAY
         - kind: character
-          text: WHO AM I?
+          text: WHO I AM
         - kind: dialogue
           text: >-
             My name is Liam, I am in my final year of my Bachelor of Digital
-            Screen with Honours majoring in Screen Writing at the University of
-            Canterbury
+            Screen with Honours majoring in Screen Writing, and minoring in
+            Cinema Studies, at the University of Canterbury. This page is
+            designed to share my work, and movie and film opinions.
       typewriter: true
       cut: ''
       hidden: false
