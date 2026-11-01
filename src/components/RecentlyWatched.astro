@@ -34,9 +34,22 @@ try {
             )}
             <span class="name">{w.title}</span>
           </a>
-          <span class="muted">
+          <span class="muted meta">
             {w.year}
             {w.rating ? ` ${stars(w.rating)}` : ''}
+            {w.liked && (
+              <span class="liked" title="Liked">
+                ♥<span class="visually-hidden"> liked</span>
+              </span>
+            )}
+            {w.rewatch && (
+              <span class="rewatch" title="Rewatch">
+                <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+                  <path d="M13 8a5 5 0 1 1-1.46-3.54M13 2.5v3h-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="visually-hidden">rewatch</span>
+              </span>
+            )}
           </span>
         </li>
       ))}
@@ -95,6 +108,21 @@ try {
     aspect-ratio: 2 / 3;
     object-fit: cover;
     background: var(--line);
+  }
+
+  .meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.75ch;
+  }
+
+  .liked {
+    color: var(--accent, var(--muted));
+  }
+
+  .rewatch svg {
+    display: block;
   }
 
   .name {

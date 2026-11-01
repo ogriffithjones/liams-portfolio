@@ -90,9 +90,25 @@ const barColour = themeColours(theme);
     </main>
 
     <footer class="page foot muted">
-      <p>© {new Date().getFullYear()} {site.name}. All rights reserved. No AI training or text and data mining.</p>
-      {theme.lightsSwitch && <p><button type="button" class="lights" data-lights>Lights off</button></p>}
-      {tmdbEnabled && <p>Film posters from <a href="https://www.themoviedb.org/" rel="noopener" target="_blank">TMDB</a>. This site uses the TMDB API but is not endorsed or certified by TMDB.</p>}
+      <div class="main">
+        <p>© {new Date().getFullYear()} {site.name}. All rights reserved.</p>
+        {theme.lightsSwitch && <button type="button" class="lights" data-lights>Lights off</button>}
+      </div>
+      <p class="fine">
+        No AI training or text and data mining.
+        {
+          tmdbEnabled && (
+            <>
+              {' '}
+              Film posters from{' '}
+              <a href="https://www.themoviedb.org/" rel="noopener" target="_blank">
+                TMDB
+              </a>
+              . This product uses the TMDB API but is not endorsed or certified by TMDB.
+            </>
+          )
+        }
+      </p>
     </footer>
 
     {
@@ -132,15 +148,31 @@ const barColour = themeColours(theme);
   }
 
   .foot {
-    padding-block: 4lh 2lh;
-  }
-
-  .foot p {
+    margin-top: 4lh;
+    padding-block: 1.5lh 2lh;
+    border-top: 1px solid var(--line);
     font-size: 0.8125em;
   }
 
-  .foot p + p {
-    margin-top: 0.5lh;
+  /* Copyright on the left, the lights switch on the right */
+  .main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5lh 2ch;
+  }
+
+  /* Small print: AI opt-out and the TMDB credit their terms require */
+  .fine {
+    margin-top: 0.75lh;
+    font-size: 0.875em;
+    line-height: 1.5;
+    opacity: 0.85;
+  }
+
+  .fine a {
+    color: inherit;
   }
 
   .lights {

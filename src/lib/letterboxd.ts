@@ -3,6 +3,7 @@ export interface Watch {
   year: string | undefined;
   rating: number | undefined;
   rewatch: boolean;
+  liked: boolean;
   watched: string | undefined;
   url: string;
   poster: string | undefined;
@@ -41,6 +42,7 @@ export async function recentWatches(username: string, limit = 4): Promise<Watch[
         year: tag(item, 'letterboxd:filmYear'),
         rating: rating ? Number(rating) : undefined,
         rewatch: tag(item, 'letterboxd:rewatch') === 'Yes',
+        liked: tag(item, 'letterboxd:memberLike') === 'Yes',
         watched: tag(item, 'letterboxd:watchedDate'),
         url: tag(item, 'link') ?? `https://letterboxd.com/${username}/`,
         poster: poster ? decode(poster) : undefined,
