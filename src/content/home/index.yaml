@@ -21,7 +21,7 @@ blocks:
     value:
       heading: INT. WORK — DAY
       items: []
-      columns: '3'
+      columns: '2'
       aspect: wide
       width: wide
       captions: full
