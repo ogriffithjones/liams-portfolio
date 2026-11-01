@@ -19,18 +19,6 @@ blocks:
       hidden: false
   - discriminant: work
     value:
-      heading: INT. Directing — DAY
-      items:
-        - echo
-      columns: '1'
-      aspect: wide
-      width: script
-      captions: full
-      preview: hover
-      cut: 'CUT TO:'
-      hidden: false
-  - discriminant: work
-    value:
       heading: INT. Writing— DAY
       items:
         - jekyll-and-hyde
@@ -40,6 +28,18 @@ blocks:
       columns: '4'
       aspect: portrait
       width: wide
+      captions: full
+      preview: hover
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: work
+    value:
+      heading: INT. Directing — DAY
+      items:
+        - echo
+      columns: '1'
+      aspect: wide
+      width: script
       captions: full
       preview: hover
       cut: 'CUT TO:'
