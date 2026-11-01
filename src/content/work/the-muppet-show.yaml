@@ -2,7 +2,9 @@ title: The Muppet Show
 year: 2026
 role: Writer
 description: Spec Script of the classic show, featuring Quinta Brunson as the guest host.
-image: ../../assets/work/the-muppet-show/image.png
+imageAlt: The Muppet Show
 link: >-
   https://ucliveac-my.sharepoint.com/my?id=%2Fpersonal%2Fldu55%5Fuclive%5Fac%5Fnz%2FDocuments%2FExegesis%20Portfolio%2FDunstan%5FL%5FWork8%5FTheMuppetShowFinalDraft%2Epdf&parent=%2Fpersonal%2Fldu55%5Fuclive%5Fac%5Fnz%2FDocuments%2FExegesis%20Portfolio&ga=1
 excerptFile: src/data/scripts/the-muppet-show/excerptFile.fountain
+excerptShow:
+  discriminant: all
