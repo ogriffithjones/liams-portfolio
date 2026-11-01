@@ -1,0 +1,18 @@
+title: Projects
+showTitle: true
+blocks:
+  - discriminant: work
+    value:
+      heading: INT. Main Project — DAY
+      items:
+        - jekyll-and-hyde
+      columns: '1'
+      aspect: wide
+      width: script
+      captions: full
+      preview: hover
+      cut: 'CUT TO:'
+      hidden: false
+ending:
+  transition: FADE OUT.
+  theEnd: true
