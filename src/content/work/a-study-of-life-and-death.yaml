@@ -8,4 +8,6 @@ excerptFile: src/data/scripts/a-study-of-life-and-death/excerptFile.fountain
 fullScript: request
 excerptShow:
   discriminant: all
-excerptMarks: auto
+excerptMarks: both
+excerptLabel:
+  discriminant: excerpt
