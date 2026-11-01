@@ -31,7 +31,6 @@ blocks:
       hidden: false
   - discriminant: list
     value:
-      heading: INT. VIDEO SHOP — DAY
       list: list-title-one
       count: 8
       layout: posters
