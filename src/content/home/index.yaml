@@ -51,6 +51,11 @@ blocks:
       count: 4
       cut: 'CUT TO:'
       hidden: false
+  - discriminant: text
+    value:
+      body: My Letterboxd. The last 4 films I watched and my rating for them.
+      cut: 'CUT TO:'
+      hidden: false
   - discriminant: contact
     value:
       heading: EXT. CONTACT — DAY
