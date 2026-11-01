@@ -1,10 +1,10 @@
-title: Reviews
+title: Opinion
 showTitle: true
 blocks:
   - discriminant: writing
     value:
-      heading: INT. Reviews — NIGHT
-      show: review
+      heading: INT. Opinions — NIGHT
+      show: opinion
       count: 4
       layout: posters
       columns: '4'
