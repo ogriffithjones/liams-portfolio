@@ -41,7 +41,7 @@ blocks:
     value:
       heading: INT. SCREENING ROOM — NIGHT
       username: '25660'
-      count: 6
+      count: 4
       cut: 'CUT TO:'
       hidden: false
   - discriminant: contact
