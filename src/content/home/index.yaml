@@ -32,6 +32,7 @@ blocks:
   - discriminant: list
     value:
       heading: INT. VIDEO SHOP — DAY
+      list: list-title-one
       count: 6
       layout: posters
       columns: '3'
