@@ -32,7 +32,7 @@ blocks:
   - discriminant: contact
     value:
       heading: EXT. CONTACT — DAY
-      cut: 'CUT TO:'
+      cut: ''
       hidden: false
 ending:
   transition: FADE OUT.
