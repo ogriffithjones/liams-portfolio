@@ -7,6 +7,9 @@ links:
     url: https://letterboxd.com/25660/
   - label: LinkdIn
     url: https://www.linkedin.com/
+  - label: CV
+    url: >-
+      https://1drv.ms/w/c/7e228e9d98f2d387/IQDl25MJMF5MRJyRxmDSiIxUAauLBogmvwDHNL2qG-SjDbo?e=ykdj4d
 reviewsPage: true
 theme:
   palette:
