@@ -1,0 +1,8 @@
+# No consent is given for any content on this site to be used to train,
+# fine-tune or evaluate AI or machine learning models, or for text and data
+# mining. All rights reserved.
+# https://site.spawning.ai/spawning-ai-txt
+
+User-Agent: *
+Disallow: /
+Disallow: *

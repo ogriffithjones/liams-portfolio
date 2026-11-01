@@ -33,6 +33,9 @@ const ogUrl = og ? new URL(og.src, Astro.site).href : null;
     <title>{fullTitle}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />
+    <!-- No AI training or text and data mining (see /ai.txt, /.well-known/tdmrep.json) -->
+    <meta name="robots" content="noai, noimageai" />
+    <meta name="tdm-reservation" content="1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)" />
@@ -66,7 +69,7 @@ const ogUrl = og ? new URL(og.src, Astro.site).href : null;
     </main>
 
     <footer class="page foot muted">
-      <p>© {new Date().getFullYear()} {site.name}</p>
+      <p>© {new Date().getFullYear()} {site.name}. All rights reserved. No AI training or text and data mining.</p>
       {tmdbEnabled && <p>Film posters from <a href="https://www.themoviedb.org/" rel="noopener" target="_blank">TMDB</a>. This site uses the TMDB API but is not endorsed or certified by TMDB.</p>}
     </footer>
   </body>

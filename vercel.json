@@ -2,11 +2,24 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noai, noimageai"
+        },
+        {
+          "key": "tdm-reservation",
+          "value": "1"
+        }
+      ]
+    },
+    {
       "source": "/(admin|keystatic|api/keystatic)(.*)",
       "headers": [
         {
           "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
+          "value": "noindex, nofollow, noai, noimageai"
         }
       ]
     }

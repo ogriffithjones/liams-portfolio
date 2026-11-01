@@ -3,9 +3,21 @@ import type { Element } from '../lib/screenplay';
 
 interface Props {
   elements: Element[];
+  /** Copyright holder, shown in the watermark, notice and copied text */
+  owner: string;
+  title: string;
+  year: number;
 }
 
-const { elements } = Astro.props;
+const { elements, owner, title, year } = Astro.props;
+const url = new URL(Astro.url.pathname, Astro.site).href;
+const notice = `Excerpt from "${title}" by ${owner}, © ${year}. All rights reserved. Not to be copied, reproduced or used for AI training. Read it at ${url}`;
+
+// Faint repeating "© Name" watermark, so screenshots carry the credit
+const mark = (fill: string) =>
+  `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='170'><text x='150' y='95' fill='${fill}' font-family='Courier New, monospace' font-size='15' text-anchor='middle' transform='rotate(-24 150 85)'>© ${owner.replace(/[<&>']/g, '')}</text></svg>`,
+  )}")`;
 
 // Group side-by-side (dual) dialogue so it can sit in two columns
 type Group = { dual: false; el: Element } | { dual: true; left: Element[]; right: Element[] };
@@ -18,6 +30,7 @@ for (const el of elements) {
 }
 ---
 
+<div class="protected" data-notice={notice} style={`--mark-light: ${mark('rgba(0,0,0,0.06)')}; --mark-dark: ${mark('rgba(255,255,255,0.06)')}`}>
 <div class="sp excerpt">
   {
     groups.map((g) =>
@@ -37,8 +50,87 @@ for (const el of elements) {
     )
   }
 </div>
+</div>
+<footer class="rights muted">
+  <p>© {year} {owner}. All rights reserved.</p>
+  <p>
+    This script may not be copied, reproduced, adapted or shared, in whole or in part, without the writer's written
+    permission.
+  </p>
+  <p>
+    No AI training. No consent is given for this script, or any part of it, to be used to train, fine-tune or evaluate
+    artificial intelligence or machine learning models, or for text and data mining of any kind. This reservation of
+    rights is made under Article 4(3) of EU Directive 2019/790 and applies wherever such a reservation is recognised.
+  </p>
+</footer>
+<p class="print-note">This script excerpt isn't available to print. Read it at {url}</p>
+
+<script>
+  // Deterrents only: the text stays in the page for search engines and
+  // screen readers, and nothing on the web can block screenshots.
+  const areas = [...document.querySelectorAll<HTMLElement>('.protected')];
+  const inside = (node: Node | null) => !!node && areas.some((a) => a.contains(node));
+
+  document.addEventListener('copy', (event) => {
+    const selection = document.getSelection();
+    const hit = areas.find((a) => selection && !selection.isCollapsed && selection.containsNode(a, true));
+    if (!hit && !inside(event.target as Node)) return;
+    event.preventDefault();
+    event.clipboardData?.setData('text/plain', (hit ?? areas[0])!.dataset.notice!);
+  });
+  for (const type of ['cut', 'contextmenu', 'dragstart', 'selectstart']) {
+    document.addEventListener(type, (event) => inside(event.target as Node) && event.preventDefault());
+  }
+</script>
 
 <style>
+  .protected {
+    position: relative;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .protected::after {
+    content: '';
+    position: absolute;
+    inset: -1lh -2ch;
+    background-image: var(--mark-light);
+    pointer-events: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .protected::after {
+      background-image: var(--mark-dark);
+    }
+  }
+
+  .rights {
+    margin-top: 3lh;
+    padding-top: 1lh;
+    border-top: 1px solid var(--line);
+    font-size: 0.8125em;
+  }
+
+  .rights p + p {
+    margin-top: 0.5lh;
+  }
+
+  .print-note {
+    display: none;
+  }
+
+  @media print {
+    .protected,
+    .rights {
+      display: none;
+    }
+
+    .print-note {
+      display: block;
+    }
+  }
+
   /* Keep line breaks from the script within a paragraph */
   .excerpt :global(p) {
     white-space: pre-line;
