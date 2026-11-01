@@ -1,7 +1,6 @@
 blocks:
   - discriminant: script
     value:
-      typewriter: true
       lines:
         - kind: action
           text: 'FADE IN:'
@@ -17,14 +16,8 @@ blocks:
           text: beat
         - kind: dialogue
           text: Dialogue placeholder. A line or two, in your own voice.
+      typewriter: true
       cut: ''
-      hidden: false
-  - discriminant: watching
-    value:
-      heading: INT. SCREENING ROOM — NIGHT
-      username: '25660'
-      count: 4
-      cut: 'CUT TO:'
       hidden: false
   - discriminant: work
     value:
@@ -57,7 +50,13 @@ blocks:
   - discriminant: notes
     value:
       heading: INT. NOTES ON FILM — NIGHT
-      limit: null
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: watching
+    value:
+      heading: INT. SCREENING ROOM — NIGHT
+      username: '25660'
+      count: 4
       cut: 'CUT TO:'
       hidden: false
   - discriminant: contact
