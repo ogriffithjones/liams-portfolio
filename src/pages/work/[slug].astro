@@ -21,6 +21,18 @@ const elements = await loadExcerpt(data);
 const video = parseVideo(data.video);
 const thumbnail = data.image ? undefined : video?.thumbnail;
 
+// The full script stays private unless Liam chooses to link it: by default
+// visitors are invited to email and ask for it.
+const request = site.email
+  ? `mailto:${site.email}?subject=${encodeURIComponent(`Script request: ${data.title}`)}`
+  : null;
+const fullScript =
+  data.fullScript === 'link' && data.link
+    ? { href: data.link, label: 'Read the full script →', external: true }
+    : data.fullScript === 'request' && request
+      ? { href: request, label: 'Request the full script →', external: false }
+      : null;
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'CreativeWork',
@@ -38,7 +50,15 @@ const jsonLd = {
       <h1 class="sp-scene">{data.title} ({data.year})</h1>
       {data.role && <p class="muted">{data.role}</p>}
       {data.description && <p>{data.description}</p>}
-      {data.link && <p><a href={data.link} rel="noopener" target="_blank">Read the full script →</a></p>}
+      {
+        fullScript && (
+          <p>
+            <a href={fullScript.href} {...(fullScript.external ? { rel: 'noopener', target: '_blank' } : {})}>
+              {fullScript.label}
+            </a>
+          </p>
+        )
+      }
     </header>
 
     {

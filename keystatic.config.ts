@@ -414,6 +414,17 @@ export default config({
           directory: 'src/data/scripts',
           publicPath: 'src/data/scripts/',
         }),
+        fullScript: fields.select({
+          label: 'Full script',
+          description:
+            'What the project page offers beyond the excerpt. "Request" opens an email to you, so you decide who reads it. "Link" uses the Link field above and makes it public.',
+          options: [
+            { label: 'Request by email', value: 'request' },
+            { label: 'Link (public)', value: 'link' },
+            { label: "Don't mention it", value: 'none' },
+          ],
+          defaultValue: 'request',
+        }),
         excerptShow: fields.conditional(
           fields.select({
             label: 'Script on site',

@@ -141,6 +141,7 @@ const work = defineCollection({
       link: url,
       excerpt: z.string().optional(),
       excerptFile: z.string().nullish(),
+      fullScript: z.enum(['request', 'link', 'none']).default('request'),
       excerptShow: z
         .discriminatedUnion('discriminant', [
           z.object({ discriminant: z.literal('all'), value: z.unknown().optional() }),
