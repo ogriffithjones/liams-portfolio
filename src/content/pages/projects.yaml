@@ -15,6 +15,7 @@ blocks:
       hidden: false
   - discriminant: list
     value:
+      heading: The projects that inspired my project
       list: list-title-one
       count: 8
       layout: posters
