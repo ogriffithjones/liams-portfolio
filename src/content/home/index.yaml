@@ -28,7 +28,7 @@ blocks:
       columns: '4'
       aspect: wide
       width: wide
-      captions: title
+      captions: full
       preview: hover
       cut: 'CUT TO:'
       hidden: false
