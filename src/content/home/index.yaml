@@ -37,24 +37,11 @@ blocks:
       columns: '4'
       cut: 'CUT TO:'
       hidden: false
-  - discriminant: notes
-    value:
-      heading: INT. NOTES ON FILM — NIGHT
-      cut: 'CUT TO:'
-      hidden: false
   - discriminant: watching
     value:
       heading: INT. SCREENING ROOM — NIGHT
       username: '25660'
-      count: 4
-      cut: 'CUT TO:'
-      hidden: false
-  - discriminant: reviews
-    value:
-      heading: INT. REVIEWS — NIGHT
-      count: 4
-      layout: posters
-      columns: '4'
+      count: 6
       cut: 'CUT TO:'
       hidden: false
   - discriminant: contact
