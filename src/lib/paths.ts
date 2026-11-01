@@ -7,11 +7,10 @@ import { getSite } from './content';
 // Addresses the site or host already uses
 const reserved = new Set(['admin', 'keystatic', 'api', '_astro', '_image', '_server-islands', 'media', 'robots.txt', 'ai.txt', '404', 'sitemap-index.xml', 'sitemap-0.xml']);
 const valid = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const defaults = { notes: 'notes', reviews: 'reviews', lists: 'lists', work: 'work' } as const;
+const defaults = { writing: 'writing', lists: 'lists', work: 'work' } as const;
 
 export interface Paths {
-  notes: string;
-  reviews: string;
+  writing: string;
   lists: string;
   work: string;
 }
@@ -19,7 +18,7 @@ export interface Paths {
 /** Section addresses, falling back to the defaults (with a build warning) if one is unusable or clashes. */
 export async function getPaths(): Promise<Paths> {
   const { sections } = await getSite();
-  const chosen = { notes: sections.notesPath, reviews: sections.reviewsPath, lists: sections.listsPath, work: sections.workPath };
+  const chosen = { writing: sections.writingPath, lists: sections.listsPath, work: sections.workPath };
   const used = new Set<string>();
   const out = {} as Paths;
   for (const key of Object.keys(defaults) as (keyof Paths)[]) {
@@ -50,10 +49,8 @@ export async function getPages() {
 export async function getLinks() {
   const p = await getPaths();
   return {
-    notes: `/${p.notes}`,
-    note: (id: string) => `/${p.notes}/${id}`,
-    reviews: `/${p.reviews}`,
-    review: (id: string) => `/${p.reviews}/${id}`,
+    writing: `/${p.writing}`,
+    piece: (id: string) => `/${p.writing}/${id}`,
     list: (id: string) => `/${p.lists}/${id}`,
     work: (id: string) => `/${p.work}/${id}`,
     page: (id: string) => `/${id}`,

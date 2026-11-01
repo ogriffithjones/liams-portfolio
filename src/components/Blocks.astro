@@ -5,13 +5,12 @@ import RecentlyWatched from './RecentlyWatched.astro';
 import Script from './blocks/Script.astro';
 import Scene from './blocks/Scene.astro';
 import Work from './blocks/Work.astro';
-import Notes from './blocks/Notes.astro';
 import Contact from './blocks/Contact.astro';
-import Reviews from './blocks/Reviews.astro';
+import Writing from './blocks/Writing.astro';
 import List from './blocks/List.astro';
 import Theatre from './Theatre.astro';
 import { prepareBlocks, paragraphs, type Block, type Ending } from '../lib/blocks';
-import { getLists, getNotes, getReviews, getWork } from '../lib/content';
+import { getLists, getWork, getWriting } from '../lib/content';
 
 interface Props {
   blocks: Block[];
@@ -19,13 +18,14 @@ interface Props {
 }
 
 const work = await getWork();
-const notes = await getNotes();
-const reviews = await getReviews();
+const writing = await getWriting();
 const lists = await getLists();
 const blocks = prepareBlocks(Astro.props.blocks, {
   work: work.length > 0,
-  notes: notes.length > 0,
-  reviews: reviews.length > 0,
+  writing: {
+    review: writing.some((w) => w.data.kind.discriminant === 'review'),
+    opinion: writing.some((w) => w.data.kind.discriminant === 'opinion'),
+  },
   lists: new Set(lists.map((l) => l.id)),
   dev: import.meta.env.DEV,
 });
@@ -79,10 +79,10 @@ const hasVideo = blocks.some(({ block }) => block.discriminant === 'work') && wo
                 />
               </Scene>
             );
-          case 'reviews':
+          case 'writing':
             return (
               <Scene heading={block.value.heading} scene={scene} id={id}>
-                <Reviews reviews={reviews} count={block.value.count} layout={block.value.layout} columns={block.value.columns} />
+                <Writing writing={writing} show={block.value.show} count={block.value.count} layout={block.value.layout} columns={block.value.columns} />
               </Scene>
             );
           case 'list': {
@@ -93,12 +93,6 @@ const hasVideo = blocks.some(({ block }) => block.discriminant === 'work') && wo
               </Scene>
             );
           }
-          case 'notes':
-            return (
-              <Scene heading={block.value.heading} scene={scene} id={id}>
-                <Notes notes={notes} limit={block.value.limit} />
-              </Scene>
-            );
           case 'text':
             return (
               <Scene heading={block.value.heading} scene={scene} id={id}>

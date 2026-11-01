@@ -1,22 +1,20 @@
 ---
-// One page per note, review, film list and project with a script, under each
-// section's address from Site settings → Sections (e.g. /opinion/my-piece).
+// One page per piece of writing, film list and project with a script, under
+// each section's address from Settings (e.g. /writing/my-piece).
 import type { GetStaticPaths } from 'astro';
-import NotePage from '../../components/pages/NotePage.astro';
-import ReviewPage from '../../components/pages/ReviewPage.astro';
+import WritingPage from '../../components/pages/WritingPage.astro';
 import ListPage from '../../components/pages/ListPage.astro';
 import WorkPage from '../../components/pages/WorkPage.astro';
-import { getLists, getNotes, getReviews, getWork } from '../../lib/content';
+import { getLists, getWork, getWriting } from '../../lib/content';
 import { getPaths } from '../../lib/paths';
 import { hasExcerpt } from '../../lib/screenplay';
 
 export const getStaticPaths = (async () => {
   const paths = await getPaths();
   return [
-    ...(await getNotes()).map((note) => ({ params: { base: paths.notes, slug: note.id }, props: { kind: 'note' as const, note } })),
-    ...(await getReviews()).map((review) => ({
-      params: { base: paths.reviews, slug: review.id },
-      props: { kind: 'review' as const, review },
+    ...(await getWriting()).map((piece) => ({
+      params: { base: paths.writing, slug: piece.id },
+      props: { kind: 'writing' as const, piece },
     })),
     ...(await getLists()).map((list) => ({ params: { base: paths.lists, slug: list.id }, props: { kind: 'list' as const, list } })),
     ...(await getWork())
@@ -28,7 +26,6 @@ export const getStaticPaths = (async () => {
 const props = Astro.props;
 ---
 
-{props.kind === 'note' && <NotePage note={props.note} />}
-{props.kind === 'review' && <ReviewPage review={props.review} />}
+{props.kind === 'writing' && <WritingPage piece={props.piece} />}
 {props.kind === 'list' && <ListPage list={props.list} />}
 {props.kind === 'work' && <WorkPage project={props.project} />}

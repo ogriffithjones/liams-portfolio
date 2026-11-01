@@ -1,0 +1,32 @@
+---
+// The latest writing on the home page or a custom page.
+import type { CollectionEntry } from 'astro:content';
+import Films from '../Films.astro';
+import { writingItems } from '../../lib/writing';
+import { getLinks } from '../../lib/paths';
+import { getSite } from '../../lib/content';
+import type { Columns, FilmLayout } from '../../lib/options';
+
+interface Props {
+  writing: CollectionEntry<'writing'>[];
+  show: 'all' | 'review' | 'opinion';
+  count: number | null | undefined;
+  layout: FilmLayout;
+  columns: Columns;
+}
+
+const { writing, show, count, layout, columns } = Astro.props;
+const pieces = show === 'all' ? writing : writing.filter((w) => w.data.kind.discriminant === show);
+const links = await getLinks();
+const { sections } = await getSite();
+const items = await writingItems(pieces.slice(0, count || 4), { withExcerpt: layout === 'list' });
+---
+
+<Films items={items} layout={layout} columns={columns} />
+<p class="more"><a href={links.writing}>All {sections.writingLabel.toLowerCase()} →</a></p>
+
+<style>
+  .more {
+    margin-top: 1.5lh;
+  }
+</style>

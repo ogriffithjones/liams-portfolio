@@ -7,8 +7,8 @@ export type ScriptLine = Extract<Block, { discriminant: 'script' }>['value']['li
 
 interface Available {
   work: boolean;
-  notes: boolean;
-  reviews: boolean;
+  /** Which kinds of writing exist */
+  writing: { review: boolean; opinion: boolean };
   /** Slugs of published lists */
   lists: Set<string>;
   dev: boolean;
@@ -22,8 +22,8 @@ export function prepareBlocks(blocks: Block[], available: Available) {
   const isEmpty = (b: Block) =>
     (b.discriminant === 'watching' && !b.value.username && !available.dev) ||
     (b.discriminant === 'work' && !available.work) ||
-    (b.discriminant === 'notes' && !available.notes) ||
-    (b.discriminant === 'reviews' && !available.reviews) ||
+    (b.discriminant === 'writing' &&
+      (b.value.show === 'all' ? !available.writing.review && !available.writing.opinion : !available.writing[b.value.show])) ||
     (b.discriminant === 'list' && !(b.value.list && available.lists.has(b.value.list))) ||
     (b.discriminant === 'script' && !b.value.lines.some((l) => l.text.trim()));
 

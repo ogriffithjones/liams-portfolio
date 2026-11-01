@@ -36,13 +36,8 @@ const extras = (cut: string) => ({
   hidden: fields.checkbox({ label: 'Hide', description: 'Keep the block but leave it off the page.' }),
 });
 
-const address = (label: string, defaultValue: string, description?: string) =>
-  fields.text({
-    label,
-    defaultValue,
-    description: description ?? `Lower-case letters, numbers and dashes, e.g. ${defaultValue}`,
-    validation: { isRequired: true, pattern: { regex: /^[a-z0-9]+(-[a-z0-9]+)*$/, message: 'Use lower-case letters, numbers and dashes only' } },
-  });
+const optionalText = (label: string, fallback: string) =>
+  fields.text({ label, description: `Leave empty for ${fallback === fallback.toLowerCase() ? '/' + fallback : fallback}.` });
 
 const navLabel = (defaultValue: string) => fields.text({ label: 'Tab label', defaultValue });
 
@@ -157,19 +152,28 @@ const pageBlocks = fields.blocks(
           ...extras('CUT TO:'),
         }),
       },
-      reviews: {
-        label: 'Reviews (latest)',
+      writing: {
+        label: 'Writing (latest)',
         itemLabel: (props) =>
           label(
-            'Reviews',
+            'Writing',
             props.fields.hidden.value,
             props.fields.heading.value,
+            { all: 'reviews and opinion', review: 'reviews', opinion: 'opinion pieces' }[props.fields.show.value as 'all'],
             `latest ${props.fields.count.value ?? 4}`,
-            filmLayouts.labels[props.fields.layout.value as keyof typeof filmLayouts.labels].toLowerCase(),
           ),
         schema: fields.object({
-          heading: sceneHeading('INT. REVIEWS — NIGHT'),
-          count: fields.integer({ label: 'How many reviews', defaultValue: 4, validation: { min: 1, max: 24 } }),
+          heading: sceneHeading('INT. WRITING — NIGHT'),
+          show: fields.select({
+            label: 'Show',
+            options: [
+              { label: 'Reviews and opinion pieces', value: 'all' },
+              { label: 'Reviews only', value: 'review' },
+              { label: 'Opinion pieces only', value: 'opinion' },
+            ],
+            defaultValue: 'all',
+          }),
+          count: fields.integer({ label: 'How many', defaultValue: 4, validation: { min: 1, max: 24 } }),
           layout: select('Layout', filmLayouts, 'posters'),
           columns: select('Columns (poster grid)', columns, '4'),
           ...extras('CUT TO:'),
@@ -194,21 +198,6 @@ const pageBlocks = fields.blocks(
           }),
           layout: select('Layout', filmLayouts, 'posters'),
           columns: select('Columns (poster grid)', columns, '4'),
-          ...extras('CUT TO:'),
-        }),
-      },
-      notes: {
-        label: 'Notes on film',
-        itemLabel: (props) =>
-          label(
-            'Notes on film',
-            props.fields.hidden.value,
-            props.fields.heading.value,
-            props.fields.limit.value ? `latest ${props.fields.limit.value}` : 'all notes',
-          ),
-        schema: fields.object({
-          heading: sceneHeading('INT. NOTES ON FILM — NIGHT'),
-          limit: fields.integer({ label: 'How many notes', description: 'Leave empty to show all.' }),
           ...extras('CUT TO:'),
         }),
       },
@@ -252,8 +241,8 @@ export default config({
     brand: { name: 'Liams Portfolio' },
     navigation: {
       Pages: ['home', 'pages'],
-      Content: ['work', 'reviews', 'lists', 'notes'],
-      Settings: ['site'],
+      Content: ['work', 'writing', 'lists'],
+      Settings: ['site', 'theme', 'navigation', 'advanced'],
     },
   },
   singletons: {
@@ -267,7 +256,7 @@ export default config({
       },
     }),
     site: singleton({
-      label: 'Site settings',
+      label: 'Profile',
       path: 'src/content/site/',
       format: { data: 'yaml' },
       schema: {
@@ -286,150 +275,6 @@ export default config({
             itemLabel: (props) => props.fields.label.value || 'Link',
           },
         ),
-        reviewsPage: fields.checkbox({
-          label: 'Reviews page',
-          description: 'Publish /reviews (with search and filters) and a page for each review.',
-          defaultValue: true,
-        }),
-        sections: fields.object(
-          {
-            notesLabel: fields.text({ label: 'Notes: name', description: 'e.g. Notes on film, Opinion pieces', defaultValue: 'Notes on film' }),
-            notesPath: address('Notes: address', 'notes', 'The page listing them, and each one at /address/piece. e.g. opinion'),
-            notesPage: fields.checkbox({ label: 'Notes: publish a page listing them all', defaultValue: true }),
-            reviewsLabel: fields.text({ label: 'Reviews: name', defaultValue: 'Reviews' }),
-            reviewsPath: address('Reviews: address', 'reviews'),
-            listsPath: address('Film lists: address', 'lists'),
-            workPath: address('Project pages: address', 'work'),
-          },
-          {
-            label: 'Sections',
-            description: 'Names and web addresses. Changing an address changes every link to it; old addresses stop working.',
-          },
-        ),
-        nav: fields.object(
-          {
-            show: fields.checkbox({
-              label: 'Show navigation',
-              description: 'A small bar at the top of every page: your name (links home) and the tabs below.',
-            }),
-            items: fields.array(
-              fields.conditional(
-                fields.select({
-                  label: 'Tab goes to',
-                  options: [
-                    { label: 'Home', value: 'home' },
-                    { label: 'Notes / opinion pieces', value: 'notes' },
-                    { label: 'Reviews', value: 'reviews' },
-                    { label: 'A page', value: 'page' },
-                    { label: 'Another website', value: 'link' },
-                  ],
-                  defaultValue: 'page',
-                }),
-                {
-                  home: fields.object({ label: navLabel('Portfolio') }),
-                  notes: fields.object({ label: navLabel('Opinion') }),
-                  reviews: fields.object({ label: navLabel('Reviews') }),
-                  page: fields.object({ page: fields.relationship({ label: 'Page', collection: 'pages' }), label: navLabel('') }),
-                  link: fields.object({ url: fields.url({ label: 'Address', validation: { isRequired: true } }), label: navLabel('') }),
-                },
-              ),
-              {
-                label: 'Tabs',
-                description: 'In order. Drag to reorder.',
-                itemLabel: (props) =>
-                  `${props.value.fields.label.value || ('page' in props.value.fields ? props.value.fields.page.value : '') || props.discriminant} → ${props.discriminant}`,
-              },
-            ),
-          },
-          { label: 'Navigation' },
-        ),
-        theme: fields.object(
-          {
-            palette: fields.conditional(
-              fields.select({
-                label: 'Palette',
-                description: 'Revision colours are the page colours film productions use for each round of script changes.',
-                options: [
-                  ...Object.entries(palettes).map(([value, p]) => ({ value, label: p.label })),
-                  { value: 'custom', label: 'Custom colours' },
-                ],
-                defaultValue: 'script',
-              }),
-              {
-                ...noFields(Object.keys(palettes) as (keyof typeof palettes)[]),
-                custom: fields.object({
-                  background: hex('Background colour', 'e.g. #f7f5f0'),
-                  text: hex('Text colour', 'e.g. #1a1a1a'),
-                }),
-              },
-            ),
-            mode: fields.select({
-              label: 'Light or dark',
-              options: Object.entries(modes).map(([value, label]) => ({ value, label })),
-              defaultValue: 'auto',
-            }),
-            accent: fields.conditional(
-              fields.select({
-                label: 'Accent colour',
-                description: 'Used for scene numbers, link underlines, the typing cursor and selected text.',
-                options: [
-                  ...Object.entries(accents).map(([value, a]) => ({ value, label: a.label })),
-                  { value: 'custom', label: 'Custom colour' },
-                ],
-                defaultValue: 'ink',
-              }),
-              {
-                ...noFields(Object.keys(accents) as (keyof typeof accents)[]),
-                custom: fields.object({ colour: hex('Accent colour', 'e.g. #c0392b') }),
-              },
-            ),
-            lightsSwitch: fields.checkbox({
-              label: 'LIGHTS OFF / LIGHTS ON switch',
-              description: 'Adds a switch in the footer so visitors can flip between light and dark themselves.',
-            }),
-            dots: fields.conditional(
-              fields.checkbox({
-                label: 'Halftone dots',
-                description: 'Printed dots across the top of every page, fading down the page and dissolving as you scroll.',
-              }),
-              {
-                false: fields.empty(),
-                true: fields.object({
-                  colour: fields.conditional(
-                    fields.select({
-                      label: 'Dot colour',
-                      options: [
-                        ...Object.entries(dotColours).map(([value, d]) => ({ value, label: d.label })),
-                        { value: 'custom', label: 'Custom colour' },
-                      ],
-                      defaultValue: 'sage',
-                    }),
-                    {
-                      ...noFields(Object.keys(dotColours) as (keyof typeof dotColours)[]),
-                      custom: fields.object({ colour: hex('Dot colour', 'e.g. #586a57') }),
-                    },
-                  ),
-                  size: fields.select({
-                    label: 'Dot size',
-                    options: Object.entries(dotSizes).map(([value, label]) => ({ value, label })),
-                    defaultValue: 'medium',
-                  }),
-                  height: fields.select({
-                    label: 'How far down the page',
-                    options: Object.entries(dotHeights).map(([value, label]) => ({ value, label })),
-                    defaultValue: 'medium',
-                  }),
-                  animate: fields.checkbox({
-                    label: 'Animate',
-                    description: 'Print in on load and dissolve on scroll. Visitors who prefer reduced motion see still dots.',
-                    defaultValue: true,
-                  }),
-                }),
-              },
-            ),
-          },
-          { label: 'Theme', description: 'Colours for the whole site. Leave as is for the original look.' },
-        ),
         seoDescription: fields.text({
           label: 'Search description',
           description: 'Shown by Google under your name. Aim for 120–160 characters.',
@@ -438,10 +283,152 @@ export default config({
         }),
       },
     }),
+    theme: singleton({
+      label: 'Theme',
+      path: 'src/content/settings/theme/',
+      format: { data: 'yaml' },
+      schema: {
+        palette: fields.conditional(
+          fields.select({
+            label: 'Palette',
+            description: 'Revision colours are the page colours film productions use for each round of script changes.',
+            options: [
+              ...Object.entries(palettes).map(([value, p]) => ({ value, label: p.label })),
+              { value: 'custom', label: 'Custom colours' },
+            ],
+            defaultValue: 'script',
+          }),
+          {
+            ...noFields(Object.keys(palettes) as (keyof typeof palettes)[]),
+            custom: fields.object({
+              background: hex('Background colour', 'e.g. #f7f5f0'),
+              text: hex('Text colour', 'e.g. #1a1a1a'),
+            }),
+          },
+        ),
+        mode: fields.select({
+          label: 'Light or dark',
+          options: Object.entries(modes).map(([value, label]) => ({ value, label })),
+          defaultValue: 'auto',
+        }),
+        accent: fields.conditional(
+          fields.select({
+            label: 'Accent colour',
+            description: 'Used for scene numbers, link underlines, the typing cursor and selected text.',
+            options: [
+              ...Object.entries(accents).map(([value, a]) => ({ value, label: a.label })),
+              { value: 'custom', label: 'Custom colour' },
+            ],
+            defaultValue: 'ink',
+          }),
+          {
+            ...noFields(Object.keys(accents) as (keyof typeof accents)[]),
+            custom: fields.object({ colour: hex('Accent colour', 'e.g. #c0392b') }),
+          },
+        ),
+        lightsSwitch: fields.checkbox({
+          label: 'LIGHTS OFF / LIGHTS ON switch',
+          description: 'Adds a switch in the footer so visitors can flip between light and dark themselves.',
+        }),
+        dots: fields.conditional(
+          fields.checkbox({
+            label: 'Halftone dots',
+            description: 'Printed dots across the top of every page, fading down the page and dissolving as you scroll.',
+          }),
+          {
+            false: fields.empty(),
+            true: fields.object({
+              colour: fields.conditional(
+                fields.select({
+                  label: 'Dot colour',
+                  options: [
+                    ...Object.entries(dotColours).map(([value, d]) => ({ value, label: d.label })),
+                    { value: 'custom', label: 'Custom colour' },
+                  ],
+                  defaultValue: 'sage',
+                }),
+                {
+                  ...noFields(Object.keys(dotColours) as (keyof typeof dotColours)[]),
+                  custom: fields.object({ colour: hex('Dot colour', 'e.g. #586a57') }),
+                },
+              ),
+              size: fields.select({
+                label: 'Dot size',
+                options: Object.entries(dotSizes).map(([value, label]) => ({ value, label })),
+                defaultValue: 'medium',
+              }),
+              height: fields.select({
+                label: 'How far down the page',
+                options: Object.entries(dotHeights).map(([value, label]) => ({ value, label })),
+                defaultValue: 'medium',
+              }),
+              animate: fields.checkbox({
+                label: 'Animate',
+                description: 'Print in on load and dissolve on scroll. Visitors who prefer reduced motion see still dots.',
+                defaultValue: true,
+              }),
+            }),
+          },
+        ),
+      },
+    }),
+    navigation: singleton({
+      label: 'Navigation',
+      path: 'src/content/settings/navigation/',
+      format: { data: 'yaml' },
+      schema: {
+        show: fields.checkbox({
+          label: 'Show navigation',
+          description: 'A small bar at the top of every page: your name (links home) and the tabs below.',
+        }),
+        items: fields.array(
+          fields.conditional(
+            fields.select({
+              label: 'Tab goes to',
+              options: [
+                { label: 'Home', value: 'home' },
+                { label: 'Writing', value: 'writing' },
+                { label: 'A page', value: 'page' },
+                { label: 'Another website', value: 'link' },
+              ],
+              defaultValue: 'page',
+            }),
+            {
+              home: fields.object({ label: navLabel('Portfolio') }),
+              writing: fields.object({ label: navLabel('Writing') }),
+              page: fields.object({ page: fields.relationship({ label: 'Page', collection: 'pages' }), label: navLabel('') }),
+              link: fields.object({ url: fields.url({ label: 'Address', validation: { isRequired: true } }), label: navLabel('') }),
+            },
+          ),
+          {
+            label: 'Tabs',
+            description: 'In order. Drag to reorder.',
+            itemLabel: (props) =>
+              `${props.value.fields.label.value || ('page' in props.value.fields ? props.value.fields.page.value : '') || props.discriminant} → ${props.discriminant}`,
+          },
+        ),
+      },
+    }),
+    advanced: singleton({
+      label: 'Advanced',
+      path: 'src/content/settings/advanced/',
+      format: { data: 'yaml' },
+      schema: {
+        writingPage: fields.checkbox({
+          label: 'Publish writing',
+          description: 'A page listing all your reviews and opinion pieces (with search and filters), and a page for each.',
+          defaultValue: true,
+        }),
+        writingLabel: optionalText('Writing: name', 'Writing'),
+        writingPath: optionalText('Writing: address', 'writing'),
+        listsPath: optionalText('Film lists: address', 'lists'),
+        workPath: optionalText('Project pages: address', 'work'),
+      },
+    }),
   },
   collections: {
     pages: collection({
-      label: 'Pages',
+      label: 'Other pages',
       slugField: 'title',
       path: 'src/content/pages/*',
       format: { data: 'yaml' },
@@ -576,39 +563,97 @@ export default config({
         ),
       },
     }),
-    reviews: collection({
-      label: 'Reviews',
+    writing: collection({
+      label: 'Writing',
       slugField: 'title',
-      path: 'src/content/reviews/*',
+      path: 'src/content/writing/*',
       format: { contentField: 'content' },
       entryLayout: 'content',
-      columns: ['title', 'watched'],
+      columns: ['title', 'date'],
       schema: {
-        title: fields.slug({ name: { label: 'Film title' } }),
-        year: fields.integer({ label: 'Release year' }),
-        director: fields.text({ label: 'Director' }),
-        rating: select('Rating', ratings, ''),
-        watched: fields.date({ label: 'Watched', validation: { isRequired: true }, defaultValue: { kind: 'today' } }),
-        rewatch: fields.checkbox({ label: 'Rewatch' }),
-        liked: fields.checkbox({ label: 'Liked ♥' }),
+        title: fields.slug({
+          name: { label: 'Title', description: 'For a review, the film’s title. For an opinion piece, the headline.' },
+        }),
+        kind: fields.conditional(
+          fields.select({
+            label: 'Type',
+            options: [
+              { label: 'Review', value: 'review' },
+              { label: 'Opinion piece', value: 'opinion' },
+            ],
+            defaultValue: 'review',
+          }),
+          {
+            review: fields.object({
+              year: fields.integer({ label: 'Release year' }),
+              director: fields.text({ label: 'Director' }),
+              rating: select('Rating', ratings, ''),
+              rewatch: fields.checkbox({ label: 'Rewatch' }),
+              liked: fields.checkbox({ label: 'Liked ♥' }),
+              poster: fields.image({
+                label: 'Poster',
+                description: 'Optional. Pulled from TMDB automatically when left empty.',
+                directory: 'src/assets/writing',
+                publicPath: '../../assets/writing/',
+              }),
+              tmdbId: filmFields.tmdbId,
+              letterboxd: fields.url({ label: 'Letterboxd link' }),
+            }),
+            opinion: fields.object({
+              film: fields.text({ label: 'Film or subject', description: 'Optional, e.g. Paris, Texas (1984)' }),
+              standfirst: fields.text({
+                label: 'Standfirst',
+                description: 'Optional. The line under the headline that sets up the piece.',
+                multiline: true,
+              }),
+              lead: fields.object(
+                {
+                  image: fields.image({ label: 'Lead image', directory: 'src/assets/writing', publicPath: '../../assets/writing/' }),
+                  alt: fields.text({ label: 'Description (alt text)' }),
+                  caption: fields.text({ label: 'Caption', multiline: true }),
+                  credit: fields.text({ label: 'Credit', description: 'e.g. Paris, Texas (1984), Road Movies / 20th Century Fox' }),
+                },
+                { label: 'Lead image', description: 'Optional. Shown large under the headline.' },
+              ),
+              filmBox: fields.object(
+                {
+                  show: fields.checkbox({ label: 'Show a film details box', description: 'At the end, titled with the Film above.' }),
+                  director: fields.text({ label: 'Director' }),
+                  runtime: fields.text({ label: 'Runtime', description: 'e.g. 2h 25m' }),
+                  country: fields.text({ label: 'Country' }),
+                  where: fields.text({ label: 'Where to watch', description: 'e.g. In cinemas, Netflix' }),
+                  link: fields.url({ label: 'Link', description: 'e.g. Letterboxd or IMDb' }),
+                },
+                { label: 'Film details' },
+              ),
+            }),
+          },
+        ),
+        date: fields.date({
+          label: 'Date',
+          description: 'Reviews: when you watched it. Opinion pieces: when it was published.',
+          validation: { isRequired: true },
+          defaultValue: { kind: 'today' },
+        }),
+        summary: fields.text({
+          label: 'Summary',
+          description: 'Optional one sentence for lists and search results. The opening lines are used if empty.',
+          multiline: true,
+          validation: { length: { max: 200 } },
+        }),
         tags: fields.array(fields.text({ label: 'Tag' }), {
           label: 'Tags',
           description: 'Used for filtering, e.g. a genre, festival or cinema.',
           itemLabel: (props) => props.value || 'Tag',
         }),
-        poster: fields.image({
-          label: 'Poster',
-          description: 'Optional. Pulled from TMDB automatically when left empty.',
-          directory: 'src/assets/reviews',
-          publicPath: '../../assets/reviews/',
-        }),
-        tmdbId: filmFields.tmdbId,
-        letterboxd: fields.url({ label: 'Letterboxd link' }),
+        byline: fields.text({ label: 'Byline', description: 'Leave empty to use your name.' }),
+        spoilers: fields.checkbox({ label: 'Spoiler warning', description: 'Shows a warning at the top.' }),
+        dropCap: fields.checkbox({ label: 'Drop cap', description: 'Large first letter on the opening paragraph.' }),
         draft: fields.checkbox({ label: 'Draft', description: 'Drafts are hidden from the live site' }),
         content: fields.markdoc({
-          label: 'Review',
-          options: { image: { directory: 'src/assets/reviews', publicPath: '../../assets/reviews/' } },
-          components: editorialComponents('src/assets/reviews', '../../assets/reviews/'),
+          label: 'Content',
+          options: { image: { directory: 'src/assets/writing', publicPath: '../../assets/writing/' } },
+          components: editorialComponents('src/assets/writing', '../../assets/writing/'),
         }),
       },
     }),
@@ -655,61 +700,6 @@ export default config({
           label: 'Intro',
           description: 'Text and images shown above the films',
           options: { image: { directory: 'src/assets/lists', publicPath: '../../assets/lists/' } },
-        }),
-      },
-    }),
-    notes: collection({
-      label: 'Notes / opinion pieces',
-      slugField: 'title',
-      path: 'src/content/notes/*',
-      format: { contentField: 'content' },
-      entryLayout: 'content',
-      columns: ['title', 'date'],
-      schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
-        date: fields.date({ label: 'Date', validation: { isRequired: true }, defaultValue: { kind: 'today' } }),
-        film: fields.text({ label: 'Film', description: 'e.g. Film Title (1984)' }),
-        summary: fields.text({
-          label: 'Summary',
-          description: 'One sentence. Shown in lists and search results.',
-          multiline: true,
-          validation: { isRequired: true, length: { max: 200 } },
-        }),
-        standfirst: fields.text({
-          label: 'Standfirst',
-          description: 'Optional. The line under the headline that sets up the piece.',
-          multiline: true,
-        }),
-        byline: fields.text({ label: 'Byline', description: 'Leave empty to use your name.' }),
-        lead: fields.object(
-          {
-            image: fields.image({ label: 'Lead image', directory: 'src/assets/notes', publicPath: '../../assets/notes/' }),
-            alt: fields.text({ label: 'Description (alt text)' }),
-            caption: fields.text({ label: 'Caption', multiline: true }),
-            credit: fields.text({ label: 'Credit', description: 'e.g. Paris, Texas (1984), Road Movies / 20th Century Fox' }),
-          },
-          { label: 'Lead image', description: 'Optional. Shown large under the headline.' },
-        ),
-        spoilers: fields.checkbox({ label: 'Spoiler warning', description: 'Shows a warning at the top of the piece.' }),
-        dropCap: fields.checkbox({ label: 'Drop cap', description: 'Large first letter on the opening paragraph.' }),
-        filmBox: fields.object(
-          {
-            show: fields.checkbox({ label: 'Show a film details box', description: 'At the end of the piece, titled with the Film above.' }),
-            director: fields.text({ label: 'Director' }),
-            runtime: fields.text({ label: 'Runtime', description: 'e.g. 2h 25m' }),
-            country: fields.text({ label: 'Country' }),
-            where: fields.text({ label: 'Where to watch', description: 'e.g. In cinemas, Netflix' }),
-            link: fields.url({ label: 'Link', description: 'e.g. Letterboxd or IMDb' }),
-          },
-          { label: 'Film details' },
-        ),
-        draft: fields.checkbox({ label: 'Draft', description: 'Drafts are hidden from the live site' }),
-        content: fields.markdoc({
-          label: 'Content',
-          options: {
-            image: { directory: 'src/assets/notes', publicPath: '../../assets/notes/' },
-          },
-          components: editorialComponents('src/assets/notes', '../../assets/notes/'),
         }),
       },
     }),

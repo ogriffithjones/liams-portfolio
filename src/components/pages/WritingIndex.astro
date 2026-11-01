@@ -1,33 +1,48 @@
 ---
-// The reviews page (search, filters, sorting). Only built when the Reviews
-// page is switched on in Site settings and there's at least one review.
+// The writing page: reviews and opinion pieces with search, filters and
+// sorting. Only built when Writing is switched on and there's something to show.
 import Base from '../../layouts/Base.astro';
 import Films from '../../components/Films.astro';
-import { getReviews, getSite, stars } from '../../lib/content';
-import { reviewItems } from '../../lib/reviews';
+import { getSite, getWriting, stars } from '../../lib/content';
+import { writingItems } from '../../lib/writing';
 
 const site = await getSite();
-const reviews = await getReviews();
-const items = await reviewItems(reviews, { withExcerpt: true });
+const pieces = await getWriting();
+const items = await writingItems(pieces, { withExcerpt: true });
+const years = pieces.flatMap((p) => (p.data.kind.discriminant === 'review' && p.data.kind.value.year ? [p.data.kind.value.year] : []));
+const bothKinds = new Set(pieces.map((p) => p.data.kind.discriminant)).size > 1;
+const label = site.sections.writingLabel;
 
-const decades = [...new Set(reviews.map((r) => r.data.year && Math.floor(r.data.year / 10) * 10).filter(Boolean))].sort(
+const decades = [...new Set(years.map((y) => Math.floor(y / 10) * 10))].sort(
   (a, b) => Number(b) - Number(a),
 );
-const tags = [...new Set(reviews.flatMap((r) => r.data.tags))].sort((a, b) => a.localeCompare(b));
+const tags = [...new Set(pieces.flatMap((p) => p.data.tags))].sort((a, b) => a.localeCompare(b));
 const ratingSteps = [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1];
 ---
 
-<Base title={site.sections.reviewsLabel} description={`Film reviews by ${site.name}. ${reviews.length} films, searchable by title, rating, decade and tag.`} back>
+<Base title={label} description={`Film reviews and writing by ${site.name}. ${pieces.length} pieces, searchable by title, rating, decade and tag.`} back>
   <section class="page sp head">
-    <h1 class="sp-scene">{site.sections.reviewsLabel}</h1>
-    <p class="muted"><span id="count">{reviews.length}</span> of {reviews.length} films</p>
+    <h1 class="sp-scene">{label}</h1>
+    <p class="muted"><span id="count">{pieces.length}</span> of {pieces.length}</p>
   </section>
 
   <form class="page filters" id="filters" role="search" hidden>
     <label class="search">
-      <span class="visually-hidden">Search reviews</span>
+      <span class="visually-hidden">Search writing</span>
       <input type="search" name="q" placeholder="Search titles, directors, tags…" autocomplete="off" />
     </label>
+    {
+      bothKinds && (
+        <label>
+          <span class="muted">Type</span>
+          <select name="kind">
+            <option value="">All</option>
+            <option value="review">Reviews</option>
+            <option value="opinion">Opinion</option>
+          </select>
+        </label>
+      )
+    }
     <label>
       <span class="muted">Rating</span>
       <select name="rating">
@@ -73,14 +88,14 @@ const ratingSteps = [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1];
   </form>
 
   <div class="page results">
-    <Films items={items} layout="list" id="reviews" />
-    <p class="empty muted" id="empty" hidden>No reviews match. <button type="button" id="reset">Clear filters</button></p>
+    <Films items={items} layout="list" id="writing" />
+    <p class="empty muted" id="empty" hidden>Nothing matches. <button type="button" id="reset">Clear filters</button></p>
   </div>
 </Base>
 
 <script>
   const form = document.querySelector<HTMLFormElement>('#filters')!;
-  const list = document.querySelector<HTMLElement>('#reviews')!;
+  const list = document.querySelector<HTMLElement>('#writing')!;
   const items = [...list.querySelectorAll<HTMLElement>(':scope > li')];
   const count = document.querySelector('#count')!;
   const empty = document.querySelector<HTMLElement>('#empty')!;
@@ -106,6 +121,7 @@ const ratingSteps = [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1];
     const words = q.split(/\s+/).filter(Boolean);
     const rating = Number(f.get('rating') || 0);
     const decade = String(f.get('decade') ?? '');
+    const kind = String(f.get('kind') ?? '');
     const tag = String(f.get('tag') ?? '');
     const liked = f.get('liked') === '1';
     const sort = String(f.get('sort') || 'watched');
@@ -117,6 +133,7 @@ const ratingSteps = [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1];
         words.every((w) => d.search!.includes(w)) &&
         Number(d.rating) >= rating &&
         (!decade || d.decade === decade) &&
+        (!kind || d.kind === kind) &&
         (!tag || d.tags!.includes(`|${tag}|`)) &&
         (!liked || d.liked === '1');
       li.hidden = !match;

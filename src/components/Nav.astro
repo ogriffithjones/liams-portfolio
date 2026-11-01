@@ -1,24 +1,21 @@
 ---
 // The navigation bar (Site settings → Navigation): name on the left linking
 // home, tabs on the right. A tab only shows if what it points to exists.
-import { getNotes, getReviews, getSite } from '../lib/content';
+import { getSite, getWriting } from '../lib/content';
 import { getLinks, getPages } from '../lib/paths';
 
 const site = await getSite();
 const links = await getLinks();
 const pages = await getPages();
-const hasNotes = site.sections.notesPage && (await getNotes()).length > 0;
-const hasReviews = (await getReviews()).length > 0;
+const hasWriting = (await getWriting()).length > 0;
 
 const tabs = site.nav.items.flatMap((item) => {
   const label = item.value.label.trim();
   switch (item.discriminant) {
     case 'home':
       return [{ label: label || 'Home', href: '/' }];
-    case 'notes':
-      return hasNotes ? [{ label: label || site.sections.notesLabel, href: links.notes }] : [];
-    case 'reviews':
-      return hasReviews ? [{ label: label || site.sections.reviewsLabel, href: links.reviews }] : [];
+    case 'writing':
+      return hasWriting ? [{ label: label || site.sections.writingLabel, href: links.writing }] : [];
     case 'page': {
       const page = pages.find((p) => p.id === item.value.page);
       return page ? [{ label: label || page.data.title, href: links.page(page.id) }] : [];

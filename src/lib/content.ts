@@ -1,11 +1,34 @@
 import { getCollection, getEntry } from 'astro:content';
+import { defaultTheme } from './themes';
 
 const published = ({ data }: { data: { draft: boolean } }) => import.meta.env.DEV || !data.draft;
 
+/**
+ * All settings as one object: Profile, plus Theme, Navigation and Advanced
+ * (each its own page in the editor). Empty or missing values use defaults.
+ */
 export async function getSite() {
-  const entry = await getEntry('site', 'index');
-  if (!entry) throw new Error('Missing src/content/site/index.yaml. Fill in Site settings in the CMS.');
-  return entry.data;
+  const [profile, theme, navigation, advanced] = await Promise.all([
+    getEntry('site', 'index'),
+    getEntry('theme', 'index'),
+    getEntry('navigation', 'index'),
+    getEntry('advanced', 'index'),
+  ]);
+  if (!profile) throw new Error('Missing src/content/site/index.yaml. Fill in Settings → Profile in the CMS.');
+  const a = advanced?.data;
+  const or = (value: string | undefined, fallback: string) => value?.trim() || fallback;
+  return {
+    ...profile.data,
+    theme: theme?.data ?? defaultTheme,
+    nav: navigation?.data ?? { show: false, items: [] },
+    writingPage: a?.writingPage ?? true,
+    sections: {
+      writingLabel: or(a?.writingLabel, 'Writing'),
+      writingPath: or(a?.writingPath, 'writing'),
+      listsPath: or(a?.listsPath, 'lists'),
+      workPath: or(a?.workPath, 'work'),
+    },
+  };
 }
 
 /** Work, newest year first. */
@@ -14,17 +37,16 @@ export async function getWork() {
   return work.sort((a, b) => b.data.year - a.data.year || a.data.title.localeCompare(b.data.title));
 }
 
-/** Published notes, newest first. Drafts show in `astro dev` only. */
-export async function getNotes() {
-  const notes = await getCollection('notes', published);
-  return notes.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-}
-
-/** Published reviews, most recently watched first. Empty when the reviews page is switched off. */
-export async function getReviews() {
-  if (!(await getSite()).reviewsPage) return [];
-  const reviews = await getCollection('reviews', published);
-  return reviews.sort((a, b) => b.data.watched.getTime() - a.data.watched.getTime());
+/**
+ * Published writing (reviews and opinion pieces), newest first. Empty when
+ * Writing is switched off in Site settings. Drafts show in `astro dev` only.
+ */
+export async function getWriting(kind?: 'review' | 'opinion') {
+  if (!(await getSite()).writingPage) return [];
+  const writing = await getCollection('writing', published);
+  return writing
+    .filter((w) => !kind || w.data.kind.discriminant === kind)
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 }
 
 export async function getLists() {

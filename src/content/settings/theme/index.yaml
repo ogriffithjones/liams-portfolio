@@ -1,0 +1,14 @@
+palette:
+  discriminant: script
+mode: auto
+accent:
+  discriminant: ink
+lightsSwitch: true
+dots:
+  discriminant: true
+  value:
+    colour:
+      discriminant: sage
+    size: medium
+    height: tall
+    animate: true
