@@ -49,7 +49,7 @@ blocks:
       heading: INT. SCREENING ROOM — NIGHT
       username: '25660'
       count: 4
-      cut: 'CUT TO:'
+      cut: ''
       hidden: false
   - discriminant: text
     value:
