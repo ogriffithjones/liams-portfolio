@@ -10,7 +10,7 @@ items:
       label: Reviews
   - discriminant: page
     value:
-      page: reviews
+      page: opinion
       label: Opinions
   - discriminant: home
     value:
