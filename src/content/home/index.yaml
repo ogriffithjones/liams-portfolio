@@ -17,6 +17,18 @@ blocks:
       typewriter: true
       cut: ''
       hidden: false
+  - discriminant: work
+    value:
+      heading: INT. WORK — DAY
+      items:
+        - echo
+      columns: '1'
+      aspect: classic
+      width: script
+      captions: full
+      preview: hover
+      cut: 'CUT TO:'
+      hidden: false
   - discriminant: text
     value:
       heading: INT. SCREENING ROOM — NIGHT
