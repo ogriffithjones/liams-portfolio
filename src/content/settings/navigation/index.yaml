@@ -1,8 +1,5 @@
 show: true
 items:
-  - discriminant: home
-    value:
-      label: Home
   - discriminant: page
     value:
       page: projects
@@ -15,3 +12,6 @@ items:
     value:
       page: reviews
       label: Opinions
+  - discriminant: home
+    value:
+      label: Home
