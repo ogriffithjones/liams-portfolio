@@ -13,6 +13,15 @@ blocks:
       preview: hover
       cut: 'CUT TO:'
       hidden: false
+  - discriminant: list
+    value:
+      heading: The projects that inspired my project
+      list: list-title-one
+      count: 8
+      layout: posters
+      columns: '4'
+      cut: ''
+      hidden: false
   - discriminant: work
     value:
       heading: INT. Directing — DAY
@@ -23,15 +32,6 @@ blocks:
       width: script
       captions: full
       preview: hover
-      cut: ''
-      hidden: false
-  - discriminant: list
-    value:
-      heading: The projects that inspired my project
-      list: list-title-one
-      count: 8
-      layout: posters
-      columns: '4'
       cut: ''
       hidden: false
   - discriminant: work
