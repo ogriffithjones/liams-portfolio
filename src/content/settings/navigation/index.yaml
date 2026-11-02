@@ -9,9 +9,9 @@ items:
       label: Portfollio
   - discriminant: page
     value:
-      page: reviews
-      label: Opinions
-  - discriminant: page
-    value:
       page: review
       label: Reviews
+  - discriminant: page
+    value:
+      page: reviews
+      label: Opinions
