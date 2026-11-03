@@ -42,7 +42,7 @@ blocks:
       hidden: false
   - discriminant: contact
     value:
-      heading: EXT. CONTACT — DAY
+      heading: Contact
       cut: 'CUT TO:'
       hidden: false
 ending:
