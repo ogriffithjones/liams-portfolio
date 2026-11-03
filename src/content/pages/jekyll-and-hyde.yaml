@@ -1,4 +1,4 @@
-title: 'Portfolio '
+title: Jekyll & Hyde
 showTitle: true
 blocks:
   - discriminant: work
@@ -96,32 +96,6 @@ blocks:
       layout: posters
       columns: '4'
       cut: ''
-      hidden: false
-  - discriminant: work
-    value:
-      heading: INT. Directing — DAY
-      items:
-        - echo
-      columns: '1'
-      aspect: wide
-      width: script
-      captions: full
-      preview: hover
-      cut: ''
-      hidden: false
-  - discriminant: work
-    value:
-      heading: INT. Writing — DAY
-      items:
-        - the-muppet-show
-        - a-study-of-life-and-death
-        - project-title-two
-      columns: '3'
-      aspect: wide
-      width: script
-      captions: full
-      preview: hover
-      cut: 'CUT TO:'
       hidden: false
 ending:
   transition: FADE OUT.
