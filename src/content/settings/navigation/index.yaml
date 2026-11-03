@@ -5,13 +5,9 @@ items:
       label: Home
   - discriminant: page
     value:
+      page: jekyll-and-hyde
+      label: Jekyll & Hyde
+  - discriminant: page
+    value:
       page: projects
       label: Portfollio
-  - discriminant: page
-    value:
-      page: review
-      label: Reviews
-  - discriminant: page
-    value:
-      page: opinion
-      label: Opinions
