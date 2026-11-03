@@ -1,0 +1,9 @@
+title: Jekyll & Hyde Pitch Deck
+year: 2026
+image: ../../assets/work/jekyll-and-hyde-pitch-deck/image.png
+fullScript: request
+excerptShow:
+  discriminant: all
+excerptMarks: auto
+excerptLabel:
+  discriminant: auto
