@@ -14,7 +14,8 @@ blocks:
         - the-muppet-show
         - a-study-of-life-and-death
         - project-title-two
-      columns: '3'
+        - jekyll-and-hyde
+      columns: '2'
       aspect: wide
       width: wide
       captions: full
