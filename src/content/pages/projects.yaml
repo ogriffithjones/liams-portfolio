@@ -16,7 +16,7 @@ blocks:
         - project-title-two
       columns: '3'
       aspect: wide
-      width: script
+      width: wide
       captions: full
       preview: hover
       cut: 'CUT TO:'
