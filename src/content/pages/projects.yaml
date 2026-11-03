@@ -11,13 +11,13 @@ blocks:
     value:
       heading: My Writing Work
       items:
+        - jekyll-and-hyde
         - the-muppet-show
         - a-study-of-life-and-death
         - project-title-two
-        - jekyll-and-hyde
       columns: '2'
       aspect: wide
-      width: wide
+      width: script
       captions: full
       preview: hover
       cut: 'CUT TO:'
