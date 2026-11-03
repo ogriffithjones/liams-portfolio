@@ -17,6 +17,7 @@ blocks:
       hidden: false
   - discriminant: text
     value:
+      heading: 'About Me:'
       body: >-
         Through my writing I aim to explore diverse and unique characters,
         particularly LGBTQIA+ characters, in settings that are rarely explored
@@ -26,7 +27,7 @@ blocks:
         My primary project the past 2 years, has been a modern adaptation of Dr.
         Jekyll & Mr. Hyde set in 1980's UK where Dr. Jekyll is a gay man who
         seeks to change his sexuality, and invertedly creates Hyde!
-      cut: 'CUT TO:'
+      cut: ''
       hidden: false
   - discriminant: text
     value:
