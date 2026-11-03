@@ -6,7 +6,7 @@ items:
   - discriminant: page
     value:
       page: jekyll-and-hyde
-      label: Jekyll & Hyde
+      label: Main Project
   - discriminant: page
     value:
       page: projects
