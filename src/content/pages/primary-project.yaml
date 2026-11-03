@@ -94,6 +94,18 @@ blocks:
         that the two people are in one in the same.
       cut: 'CUT TO:'
       hidden: false
+  - discriminant: work
+    value:
+      heading: Pitch Deck
+      items:
+        - jekyll-and-hyde-pitch-deck
+      columns: '1'
+      aspect: wide
+      width: script
+      captions: full
+      preview: hover
+      cut: 'CUT TO:'
+      hidden: false
   - discriminant: list
     value:
       heading: The projects that inspired my work on 'Jekyll & Hyde'
