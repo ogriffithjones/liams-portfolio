@@ -4,10 +4,13 @@ role: Writer
 description: Modern Adaptation of Dr. Jekyll & Mr. Hyde.
 image: ../../assets/work/jekyll-and-hyde/image.png
 imageAlt: Jekyll & Hyde
-excerptFile: src/data/scripts/jekyll-and-hyde/excerptFile.docx
+excerptFile: src/data/scripts/jekyll-and-hyde/excerptFile.pdf
 fullScript: request
 excerptShow:
-  discriminant: all
-excerptMarks: both
+  discriminant: chosen
+  value:
+    scenes: (16-18)
+    gaps: true
+excerptMarks: none
 excerptLabel:
   discriminant: excerpt
