@@ -4,8 +4,6 @@ blocks:
       lines:
         - kind: action
           text: 'FADE IN:'
-        - kind: scene
-          text: INT. WEBSITE — DAY
         - kind: character
           text: WHO I AM
         - kind: dialogue
@@ -17,22 +15,17 @@ blocks:
       typewriter: true
       cut: ''
       hidden: false
-  - discriminant: work
+  - discriminant: text
     value:
-      heading: INT. WORK — DAY
-      items:
-        - echo
-      columns: '1'
-      aspect: classic
-      width: script
-      captions: full
-      preview: hover
+      body: >-
+        Through my writing I aim to explore diverse and unique characters,
+        particularly LGBTQIA+ characters, in settings that are rarely explored
+        in film and television
       cut: 'CUT TO:'
       hidden: false
   - discriminant: text
     value:
-      heading: INT. SCREENING ROOM — NIGHT
-      body: What I've been watching...
+      heading: What I've been watching...
       cut: 'FADE TO:'
       hidden: false
   - discriminant: watching
