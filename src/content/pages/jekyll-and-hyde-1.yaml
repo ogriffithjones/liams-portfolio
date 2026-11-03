@@ -1,0 +1,102 @@
+title: Jekyll & Hyde
+showTitle: true
+blocks:
+  - discriminant: work
+    value:
+      heading: INT. Main Project — DAY
+      items:
+        - jekyll-and-hyde
+      columns: '1'
+      aspect: wide
+      width: script
+      captions: full
+      preview: hover
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: text
+    value:
+      heading: 'INT. One Sheet — Night '
+      body: >-
+        Genre: Drama
+
+
+        Logline:
+
+        In 1980’s London, a respectable doctor, Henry Jekyll, experiments on
+        himself in hopes to change his sexuality, but in turn creates a curious
+        new version of himself, Hyde.
+
+
+        Synopsis:
+
+        This film adaptation of “The Curious Case of Dr. Jekyll and Mr. Hyde”
+        written by Robert Louis Stevenson, is set in 1984 England, as the AIDs
+        crisis has become publicly known and fuelled political and social
+        turmoil across the UK.  Dr. Henry Jekyll a respectable doctor has always
+        had what he considers to be peculiar “urges” (his homosexuality) that he
+        has attempted to suppress throughout his life, through Conversion
+        Therapies. Throughout adulthood, he has strived to be an upstanding and
+        well-adjusted member of society. However, on a night out, Dr. Jekyll
+        gives into his repressed homosexual urges, leading to a night with an
+        estranged friend.
+
+
+        Knowing his mistake of how it presents himself to the wider society,
+        especially as those who are homosexual are looked down upon, but also
+        that he has potentially afflicted himself with AIDS, Dr. Jekyll tries to
+        remove his homosexuality from his body.  He shuts out his most important
+        people in his life, his close friend Gabriel Utterson, whom he has deep
+        romantic feelings for, but is afraid to ever admit; as well as his
+        sister, Victoria. He devises a type of conversion therapy for himself,
+        that combines both chemical and electroshock therapies, and instead
+        transforms himself into a new persona for himself, Hyde. In contrast to
+        Dr. Jekyll, Hyde is the opposite of Dr. Jekyll, being open with his
+        sexuality, and also more confident, brave and compassionate.
+
+        As Hyde, Dr. Jekyll is drawn into a new world that he would be too
+        scared to explore without the cover of Hyde.  Despite this Dr. Jekyll
+        still has trouble reconciling with his sexuality, and still tries to
+        hide it, creating a double life for himself that is only amplified by
+        the relationship he develops with Rebecca Enfield, who he uses to
+        further differentiate his two personalities. As Dr. Jekyll distances the
+        people around him, he becomes closer with Phil, the only person who
+        knows the secret duality of Dr. Jekyll and Hyde and allows them to use
+        his apartment. However, when Phil develops HIV, it strains the
+        relationship with Dr. Jekyll.
+
+
+        The people around Dr. Jekyll do become suspicious of his relationship
+        with Hyde. For Gabriel, this is after Dr. Jekyll asks for Hyde to be
+        included in his will, as well as when Gabriel meets Hyde at a gay bar
+        and notices how similar he looks to Dr. Jekyll. For Victoria it is when
+        she discovers Hyde’s jacket in Dr. Jekyll’s room. For Rebecca it is when
+        she sees Hyde and Gabriel together. This all comes to a head in a
+        confrontational argument in which Dr. Jekyll continues to lie to all of
+        them.
+
+
+        Towards the end of the film, Dr. Jekyll comes out to his sister
+        Victoria, acknowledging that he is gay, however he still doesn’t want to
+        be.  Then after months, of seclusion and living as Hyde in the safety of
+        his home, Dr. Jekyll reconnects with Gabriel and finds comfort in his
+        close friend. This is short lived as he tries to re-cure himself once
+        and for-all but instead merges himself into one body, with the looks of
+        Hyde and the mind of Dr. Jekyll. He then dies from AIDs, after coming to
+        the realisation that he could have everything, he wanted without ever
+        changing if he just wasn’t scared. Ultimately Gabriel finds his friend’s
+        dead body, dressed in Hyde’s clothes, and he is finally able to confirm
+        that the two people are in one in the same.
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: list
+    value:
+      heading: The projects that inspired my work on 'Jekyll & Hyde'
+      list: list-title-one
+      count: 8
+      layout: posters
+      columns: '4'
+      cut: ''
+      hidden: false
+ending:
+  transition: FADE OUT.
+  theEnd: true
