@@ -1,10 +1,10 @@
 title: Jekyll & Hyde
 year: 2026
 role: Writer
-description: Modern Adaptation of Dr. Jekyll & Mr. Hyde
+description: Modern Adaptation of Dr. Jekyll & Mr. Hyde.
 image: ../../assets/work/jekyll-and-hyde/image.png
 imageAlt: Jekyll & Hyde
-excerptFile: src/data/scripts/jekyll-and-hyde/excerptFile.fountain
+excerptFile: src/data/scripts/jekyll-and-hyde/excerptFile.docx
 fullScript: request
 excerptShow:
   discriminant: all
