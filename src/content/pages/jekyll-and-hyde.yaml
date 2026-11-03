@@ -14,7 +14,7 @@ blocks:
         - jekyll-and-hyde
       columns: '1'
       aspect: wide
-      width: wide
+      width: script
       captions: full
       preview: hover
       cut: 'CUT TO:'
