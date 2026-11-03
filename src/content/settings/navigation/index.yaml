@@ -5,7 +5,7 @@ items:
       label: Home
   - discriminant: page
     value:
-      page: jekyll-and-hyde
+      page: primary-project
       label: Primary Project
   - discriminant: page
     value:
