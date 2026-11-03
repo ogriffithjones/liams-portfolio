@@ -1,0 +1,6 @@
+title: Projects
+showTitle: true
+blocks: []
+ending:
+  transition: FADE OUT.
+  theEnd: true
