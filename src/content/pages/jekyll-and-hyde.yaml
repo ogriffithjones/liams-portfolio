@@ -21,6 +21,7 @@ blocks:
       hidden: false
   - discriminant: text
     value:
+      heading: The One Sheet
       body: >-
         Genre: Drama
 
