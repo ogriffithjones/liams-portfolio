@@ -9,7 +9,7 @@ blocks:
       hidden: false
   - discriminant: work
     value:
-      heading: INT. Directing — DAY
+      heading: My Directing Work
       items:
         - echo
       columns: '1'
@@ -21,12 +21,12 @@ blocks:
       hidden: false
   - discriminant: work
     value:
-      heading: INT. Writing — DAY
+      heading: My Writing Work
       items:
         - the-muppet-show
         - a-study-of-life-and-death
         - project-title-two
-      columns: '2'
+      columns: '3'
       aspect: wide
       width: script
       captions: full
