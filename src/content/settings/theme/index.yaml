@@ -1,5 +1,5 @@
 palette:
-  discriminant: script
+  discriminant: projection
 mode: auto
 accent:
   discriminant: ink
