@@ -1,18 +1,6 @@
-title: Jekyll & Hyde
+title: ''
 showTitle: true
 blocks:
-  - discriminant: work
-    value:
-      heading: INT. Main Project — DAY
-      items:
-        - jekyll-and-hyde
-      columns: '1'
-      aspect: wide
-      width: script
-      captions: full
-      preview: hover
-      cut: 'CUT TO:'
-      hidden: false
   - discriminant: text
     value:
       heading: 'INT. One Sheet — Night '
@@ -86,6 +74,18 @@ blocks:
         changing if he just wasn’t scared. Ultimately Gabriel finds his friend’s
         dead body, dressed in Hyde’s clothes, and he is finally able to confirm
         that the two people are in one in the same.
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: work
+    value:
+      heading: INT. Main Project — DAY
+      items:
+        - jekyll-and-hyde
+      columns: '1'
+      aspect: wide
+      width: wide
+      captions: full
+      preview: hover
       cut: 'CUT TO:'
       hidden: false
   - discriminant: list
