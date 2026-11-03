@@ -26,7 +26,7 @@ blocks:
         - the-muppet-show
         - a-study-of-life-and-death
         - project-title-two
-      columns: '1'
+      columns: '2'
       aspect: wide
       width: script
       captions: full
