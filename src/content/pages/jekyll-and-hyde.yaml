@@ -3,7 +3,13 @@ showTitle: true
 blocks:
   - discriminant: text
     value:
-      heading: 'INT. One Sheet — Night '
+      body: >-
+        My primary project the past two years, has been 'Jekyll & Hyde', a
+        modern adaptation of 'The Strange Case of Dr. Jekyll & Mr. Hyde'
+      cut: 'CUT TO:'
+      hidden: false
+  - discriminant: text
+    value:
       body: >-
         Genre: Drama
 
@@ -78,7 +84,6 @@ blocks:
       hidden: false
   - discriminant: work
     value:
-      heading: INT. Main Project — DAY
       items:
         - jekyll-and-hyde
       columns: '1'
